@@ -14,10 +14,10 @@ void loop() {
     sensor1.read();
   }
   if ( sensor1.read() ) {
-    Serial.println("ON");
+    digitalWrite(9, HIGH);
   }
   else {
-    Serial.println("");
+    digitalWrite(9, LOW);
   }
   delay(250);
 } 
