@@ -3,21 +3,13 @@
 #define ANALOG_0 0
 #define PIN_7 7
 
-TrackSensor sensor1(ANALOG_0, PIN_7, 920);
+TrackSensor sensor1(ANALOG_0, PIN_7, 30);
  
 void setup() {
   Serial.begin(9600);
 } 
  
 void loop() {
-  for ( int i = 0; i < 10; i++ ) {
-    sensor1.read();
-  }
-  if ( sensor1.read() ) {
-    digitalWrite(9, HIGH);
-  }
-  else {
-    digitalWrite(9, LOW);
-  }
-  delay(250);
+  digitalWrite(9, sensor1.read()? HIGH : LOW);
+  delay(1);
 } 

@@ -4,13 +4,13 @@
 class TrackSensor {
   
   public:
-    TrackSensor(int analogPin, int irLEDPin, int threshold);
+    TrackSensor(int analogPin, int irLEDPin, int difference);
     bool read(void);
   
   private:
     int _analogPin;
     int _irLEDPin;
-    int _threshold;
+    int _difference;
     int _correctCount;
   
 };
