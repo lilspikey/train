@@ -1,4 +1,7 @@
 import struct
+import GPIO
+import time
+from array import array
 
 # porting over from https://github.com/adafruit/Adafruit_SSD1306/blob/master/Adafruit_SSD1306.cpp
 
@@ -56,8 +59,14 @@ class Adafruit_SSD1306(object):
     def __init__(self, bus, address, reset_pin, vccstate=SSD1306_SWITCHCAPVCC):
         self.bus = bus
         self.address = address
+        self.buffer = array('B', [0 for i in range(self.WIDTH*self.HEIGHT/8)])
 
-        # TODO reset pin etc
+        GPIO.setup(reset_pin, GPIO.OUT)
+        GPIO.output(reset_pin, GPIO.HIGH)
+        time.sleep(0.001)
+        GPIO.output(reset_pin, GPIO.LOW)
+        time.sleep(0.01)
+        GPIO.output(reset_pin, GPIO.HIGH)
 
         self.ssd1306_command(SSD1306_DISPLAYOFF)
         self.ssd1306_command(SSD1306_SETDISPLAYCLOCKDIV)
@@ -101,3 +110,17 @@ class Adafruit_SSD1306(object):
     def ssd1306_data(self, bytes):
         bytes = struct.pack('B%dB' % len(bytes), *bytes)
         self.bus.write(self.address, bytes)
+
+    def display(self):
+        self.ssd1306_command(SSD1306_COLUMNADDR)
+        self.ssd1306_command(0)
+        ssd1306_command(127)
+
+        ssd1306_command(SSD1306_PAGEADDR)
+        ssd1306_command(0)
+        ssd1306_command(7)
+
+        for i in xrange(0, len(self.buffer), 16):
+            data = self.buffer[i:i+16]
+            self.ssd1306_data(data)
+        
