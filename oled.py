@@ -1,5 +1,5 @@
 import struct
-import RPi.GPIO as GPIO
+from RPi import GPIO
 import time
 from array import array
 
@@ -60,7 +60,7 @@ class Adafruit_SSD1306(object):
         self.bus = bus
         self.address = address
         self.buffer = array('B', [0 for i in range(self.WIDTH*self.HEIGHT/8)])
-
+        
         GPIO.setup(reset_pin, GPIO.OUT)
         GPIO.output(reset_pin, GPIO.HIGH)
         time.sleep(0.001)
@@ -88,7 +88,7 @@ class Adafruit_SSD1306(object):
         self.ssd1306_command(SSD1306_SETCOMPINS)
         self.ssd1306_command(0x12)
         self.ssd1306_command(SSD1306_SETCONTRAST)
-        if :vccstate == SSD1306_EXTERNALVCC:
+        if vccstate == SSD1306_EXTERNALVCC:
             self.ssd1306_command(0x9F)
         else: 
             self.ssd1306_command(0xCF)
@@ -108,17 +108,17 @@ class Adafruit_SSD1306(object):
         self.bus.write(self.address, bytes)
 
     def ssd1306_data(self, bytes):
-        bytes = struct.pack('B%dB' % len(bytes), *bytes)
+        bytes = struct.pack('B%dB' % len(bytes), 0x40, *bytes)
         self.bus.write(self.address, bytes)
 
     def display(self):
         self.ssd1306_command(SSD1306_COLUMNADDR)
         self.ssd1306_command(0)
-        ssd1306_command(127)
+        self.ssd1306_command(127)
 
-        ssd1306_command(SSD1306_PAGEADDR)
-        ssd1306_command(0)
-        ssd1306_command(7)
+        self.ssd1306_command(SSD1306_PAGEADDR)
+        self.ssd1306_command(0)
+        self.ssd1306_command(7)
 
         for i in xrange(0, len(self.buffer), 16):
             data = self.buffer[i:i+16]
