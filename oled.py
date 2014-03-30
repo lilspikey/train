@@ -123,4 +123,31 @@ class Adafruit_SSD1306(object):
         for i in xrange(0, len(self.buffer), 16):
             data = self.buffer[i:i+16]
             self.ssd1306_data(data)
+
+    def blit(self, source):
+        '''display a pygame surface on the screen'''
+        # TODO can probably be more efficient here,
+        # but we're dealign with relatively small number of pixels
+        # so may well be ok for display that doesn't update too often
+        # TODO check that source and screen match size
+        for y in xrange(0, self.HEIGHT):
+            yindex = (y/8) * self.WIDTH
+            for x in xrange(0, self.WIDTH):
+                index = x + yindex
+                bit = (1 << (y&7))
+                # apply basic threshold to source color
+                # TODO possibly memoize this conversion?
+                col = source.get_at((x,y))
+                black = True
+                if col.a != 255:
+                    avg = (col.r + col.g + col.b)/3
+                    if avg > 200:
+                        black = False
+                if black:
+                    self.buffer[index] &= ~bit
+                else:
+                    self.buffer[index] |=  bit
+        self.display()
+
+
         

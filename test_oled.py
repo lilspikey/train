@@ -4,7 +4,9 @@ from oled import Adafruit_SSD1306
 from i2c import Bus
 from RPi import GPIO
 import time
-import random
+import pygame.image
+import pygame.transform
+import sys
 
 
 if __name__ == '__main__':
@@ -14,25 +16,12 @@ if __name__ == '__main__':
     bus = Bus(0)
     try:
         screen = Adafruit_SSD1306(bus, address, OLED_RESET)
-
-        for n in range(5):
-            for i in range(len(screen.buffer)):
-                screen.buffer[i] = random.randint(0,255)
-            screen.display()
-            time.sleep(0.1)
-
-        for i in range(len(screen.buffer)):
-            screen.buffer[i] = 0
         
-        screen.display()
-        time.sleep(0.1)
-
-        for i in range(len(screen.buffer)):
-            if i % 8 == 0:
-                screen.buffer[i] = 255
-            else:
-                screen.buffer[i] = 1
-        screen.display()
+        for name in sys.argv[1:]:
+            surface = pygame.image.load(name)
+            scaled = pygame.transform.smoothscale(surface, (screen.width, screen.height))
+            screen.blit(scaled)
+            time.sleep(1)
         
     finally:
         GPIO.cleanup()
