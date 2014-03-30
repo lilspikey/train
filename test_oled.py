@@ -15,11 +15,24 @@ if __name__ == '__main__':
     try:
         screen = Adafruit_SSD1306(bus, address, OLED_RESET)
 
-        for n in range(20):
+        for n in range(5):
             for i in range(len(screen.buffer)):
                 screen.buffer[i] = random.randint(0,255)
             screen.display()
-            time.sleep(0.5)
+            time.sleep(0.1)
+
+        for i in range(len(screen.buffer)):
+            screen.buffer[i] = 0
+        
+        screen.display()
+        time.sleep(0.1)
+
+        for i in range(len(screen.buffer)):
+            if i % 8 == 0:
+                screen.buffer[i] = 255
+            else:
+                screen.buffer[i] = 1
+        screen.display()
         
     finally:
         GPIO.cleanup()
