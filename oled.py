@@ -1,5 +1,5 @@
 import struct
-import GPIO
+import RPi.GPIO as GPIO
 import time
 from array import array
 
