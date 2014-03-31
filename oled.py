@@ -139,7 +139,7 @@ class Adafruit_SSD1306(object):
                 # TODO possibly memoize this conversion?
                 col = source.get_at((x,y))
                 black = True
-                if col.a != 255:
+                if col.a > 200:
                     avg = (col.r + col.g + col.b)/3
                     if avg > 200:
                         black = False
