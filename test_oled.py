@@ -19,7 +19,7 @@ if __name__ == '__main__':
         
         for name in sys.argv[1:]:
             surface = pygame.image.load(name)
-            scaled = pygame.transform.smoothscale(surface, (screen.width, screen.height))
+            scaled = pygame.transform.smoothscale(surface, (screen.WIDTH, screen.HEIGHT))
             screen.blit(scaled)
             time.sleep(1)
         
