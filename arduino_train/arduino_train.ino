@@ -21,9 +21,9 @@ void setup() {
 } 
  
 void loop() {
-  for ( int i = 0; i < 1024; i++ ) {
+  for ( int i = 800; i < 1024; i++ ) {
     throttle.set_power(i);
-    delay(10);
+    delay(100);
   }
   delay(250);
 } 
