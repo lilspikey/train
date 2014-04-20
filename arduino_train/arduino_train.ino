@@ -18,9 +18,14 @@ Throttle throttle(THROTTLE_POWER, THROTTLE_FWD, THROTTLE_BCK);
 
 Protocol protocol(Serial);
 
+void throttle_received(int power) {
+  throttle.set_power(power);
+}
+
 void setup() {
   Serial.begin(9600);
   Timer1.initialize(1e6/PWM_HZ);
+  protocol.set_throttle_received(throttle_received);
 } 
  
 void loop() {

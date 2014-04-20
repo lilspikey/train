@@ -59,6 +59,7 @@ class Protocol {
     explicit Protocol(Stream& stream);
     void receive();
     void log(const char* msg);
+    void set_throttle_received(void (*throttle_received)(int)) { _throttle_received = throttle_received;  };
   
   protected:
     void received(protocol_cmd cmd, int arg);
@@ -69,6 +70,7 @@ class Protocol {
     protocol_state _state;
     protocol_cmd _cmd;
     int _arg;
+    void (*_throttle_received)(int);
 };
 
 #endif
