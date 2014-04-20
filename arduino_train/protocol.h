@@ -1,20 +1,22 @@
 #ifndef __PROTOCOL_H__
 #define __PROTOCOL_H__
 
+#include <Arduino.h>
+
 // use PPP frame format
-static const int START_BYTE = 0x7E;
-static const int ESCAPE_BYTE = 0x7D;
-static const int ESCAPE_MASK = 0x20;
-static const int END_BYTE = 0x7E;
+static const int FRAME_START_BYTE = 0x7E;
+static const int FRAME_ESCAPE_BYTE = 0x7D;
+static const int FRAME_ESCAPE_MASK = 0x20;
+static const int FRAME_END_BYTE = 0x7E;
 
 
 typedef enum {
-  READY, IN_FRAME, IN_ESCAPE
+  FRAME_READY, FRAME_STARTED, FRAME_ESCAPING
 } frame_state;
 
 
 typedef enum {
-  FRAME_START, DATA, NO_DATA, FRAME_END
+  FRAME_BEGIN, FRAME_DATA, FRAME_NO_DATA, FRAME_END
 } frame_event;
 
 
@@ -26,14 +28,47 @@ class FrameEvent {
 };
 
 
-class FrameParser {
+class Frame {
   public:
-    explicit FrameParser();
-    FrameEvent processByte(char b);
+    explicit Frame(Stream& stream);
+    FrameEvent receive();
+    void begin();
+    void write(char c);
+    void end();
     
   private:
+    Stream& _stream;
     frame_state _state;
 };
 
+
+typedef enum {
+  PROTOCOL_READY, PROTOCOL_READ_CMD, PROTOCOL_READ_ARG
+} protocol_state;
+
+
+typedef enum {
+  PROTOCOL_CMD_LOG = 1,
+  PROTOCOL_CMD_STATUS = 2,
+  PROTOCOL_CMD_THROTTLE = 3
+} protocol_cmd;
+
+
+class Protocol {
+  public:
+    explicit Protocol(Stream& stream);
+    void receive();
+    void log(const char* msg);
+  
+  protected:
+    void received(protocol_cmd cmd, int arg);
+    void write(const char* msg);
+  
+  private:
+    Frame _frame;
+    protocol_state _state;
+    protocol_cmd _cmd;
+    int _arg;
+};
 
 #endif

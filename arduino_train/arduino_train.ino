@@ -1,6 +1,7 @@
 #include <TimerOne.h>
 #include "track_sensor.h"
 #include "throttle.h"
+#include "protocol.h"
 
 #define ANALOG_0 0
 #define PIN_7 7
@@ -14,16 +15,16 @@
 
 Throttle throttle(THROTTLE_POWER, THROTTLE_FWD, THROTTLE_BCK);
 //TrackSensor sensor1(ANALOG_0, PIN_7, 30);
- 
+
+Protocol protocol(Serial);
+
 void setup() {
   Serial.begin(9600);
   Timer1.initialize(1e6/PWM_HZ);
 } 
  
 void loop() {
-  for ( int i = 800; i < 1024; i++ ) {
-    throttle.set_power(i);
-    delay(100);
+  while ( Serial.available() > 0 ) {
+    protocol.receive();
   }
-  delay(250);
 } 
