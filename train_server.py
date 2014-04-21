@@ -34,7 +34,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
 
 def configure_app(args):
-    port = serial.Serial(args.serial_port)
+    port = serial.Serial(args.serial_port, timeout=0.1)
     serial_protocol = serialhandler.SerialProtocol(port)
     application = tornado.web.Application([
         (r"/", MainHandler),

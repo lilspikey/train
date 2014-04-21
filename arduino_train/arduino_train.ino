@@ -20,12 +20,15 @@ Protocol protocol(Serial);
 
 void throttle_received(int power) {
   throttle.set_power(power);
+  protocol.log("set throttle");
 }
 
 void setup() {
   Serial.begin(9600);
+  protocol.log("Setup started");
   Timer1.initialize(1e6/PWM_HZ);
   protocol.set_throttle_received(throttle_received);
+  protocol.log("Setup complete");
 } 
  
 void loop() {
