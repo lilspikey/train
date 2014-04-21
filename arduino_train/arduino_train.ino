@@ -18,21 +18,30 @@ Throttle throttle(THROTTLE_POWER, THROTTLE_FWD, THROTTLE_BCK);
 
 Protocol protocol(Serial);
 
-void throttle_received(int power) {
+void throttle_fwd(int power) {
+  throttle.forward();
   throttle.set_power(power);
-  protocol.log("set throttle");
+  protocol.log("throttle fwd");
+}
+
+void throttle_rev(int power) {
+  throttle.reverse();
+  throttle.set_power(power);
+  protocol.log("throttle bck");
 }
 
 void setup() {
   Serial.begin(9600);
   protocol.log("Setup started");
   Timer1.initialize(1e6/PWM_HZ);
-  protocol.set_throttle_received(throttle_received);
+  protocol.set_throttle_fwd(throttle_fwd);
+  protocol.set_throttle_rev(throttle_rev);
   protocol.log("Setup complete");
 } 
- 
+
 void loop() {
   while ( Serial.available() > 0 ) {
     protocol.receive();
   }
-} 
+  throttle.update();
+}

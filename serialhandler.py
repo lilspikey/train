@@ -8,9 +8,10 @@ FRAME_ESCAPE_MASK = 0x20
 FRAME_END_BYTE = 0x7E
 
 
-PROTOCOL_CMD_LOG = 1,
-PROTOCOL_CMD_STATUS = 2,
-PROTOCOL_CMD_THROTTLE = 3
+PROTOCOL_CMD_LOG = 1
+PROTOCOL_CMD_STATUS = 2
+PROTOCOL_CMD_THROTTLE_FWD = 3
+PROTOCOL_CMD_THROTTLE_REV = 4
 
 
 class SerialClosedException(Exception):
@@ -88,7 +89,10 @@ class SerialProtocol(object):
         with self.frame as frame:
             frame.write(struct.pack('>BH', cmd_id, arg))
 
-    def throttle(self, power):
+    def throttle_forward(self, power):
         power = max(0, min(1024, power));
-        self.cmd(PROTOCOL_CMD_THROTTLE, power)
+        self.cmd(PROTOCOL_CMD_THROTTLE_FWD, power)
 
+    def throttle_reverse(self, power):
+        power = max(0, min(1024, power));
+        self.cmd(PROTOCOL_CMD_THROTTLE_REV, power)

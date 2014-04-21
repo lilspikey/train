@@ -67,7 +67,7 @@ FrameEvent Frame::receive() {
 
 
 Protocol::Protocol(Stream& stream)
-  : _frame(stream), _state(PROTOCOL_READY), _throttle_received(NULL) {}
+  : _frame(stream), _state(PROTOCOL_READY), _throttle_fwd(NULL), _throttle_rev(NULL) {}
 
 
 void Protocol::receive() {
@@ -123,11 +123,17 @@ void Protocol::write(const char* msg) {
 void Protocol::received(protocol_cmd cmd, int arg) {
   log("received command");
   switch(cmd) {
-    case PROTOCOL_CMD_THROTTLE: {
-      if ( _throttle_received ) {
-        _throttle_received(arg);
+    case PROTOCOL_CMD_THROTTLE_FWD: {
+      if ( _throttle_fwd ) {
+        _throttle_fwd(arg);
       }
     }
-    break;  
+    break;
+    case PROTOCOL_CMD_THROTTLE_REV: {
+      if ( _throttle_rev ) {
+        _throttle_rev(arg);
+      }
+    }
+    break;
   }
 }
