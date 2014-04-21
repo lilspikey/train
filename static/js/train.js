@@ -22,7 +22,6 @@
             }
         }, 100);
 
-        // TODO scale width height to full windows size
         var layout = Raphael('layout', "100%", "100%");
         layout.setViewBox(0, 0, view_port.width, view_port.height, true);
         
