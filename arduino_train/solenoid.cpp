@@ -2,8 +2,8 @@
 #include <Arduino.h>
 
 
-Solenoid::Solenoid(int pin)
-  : _pin(pin), _active(false), _prevMillis(0) {
+Solenoid::Solenoid(int pin, int durationMillis)
+  : _pin(pin), _active(false), _durationMillis(durationMillis), _prevMillis(0) {
   pinMode(_pin, OUTPUT);  
 }
 
@@ -18,7 +18,7 @@ void Solenoid::activate() {
 void Solenoid::update() {
   if ( _active ) {
     unsigned long duration = millis() - _prevMillis;
-    if (duration >= 250) {
+    if (duration >= _durationMillis) {
       digitalWrite(_pin, LOW);
       _active = false;
     }

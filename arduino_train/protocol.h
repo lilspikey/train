@@ -51,7 +51,10 @@ typedef enum {
   PROTOCOL_CMD_LOG = 1,
   PROTOCOL_CMD_STATUS = 2,
   PROTOCOL_CMD_THROTTLE_FWD = 3,
-  PROTOCOL_CMD_THROTTLE_REV = 4
+  PROTOCOL_CMD_THROTTLE_REV = 4,
+  PROTOCOL_CMD_TURNOUT_LEFT = 5,
+  PROTOCOL_CMD_TURNOUT_RIGHT = 6,
+  PROTOCOL_CMD_DECOUPLER = 7
 } protocol_cmd;
 
 
@@ -60,8 +63,7 @@ class Protocol {
     explicit Protocol(Stream& stream);
     void receive();
     void log(const char* msg);
-    void set_throttle_fwd(void (*throttle_fwd)(int)) { _throttle_fwd = throttle_fwd;  };
-    void set_throttle_rev(void (*throttle_rev)(int)) { _throttle_rev = throttle_rev;  };
+    void set_cmd_handler(void (*cmd_handler)(protocol_cmd, int)) { _cmd_handler = cmd_handler; };
   
   protected:
     void received(protocol_cmd cmd, int arg);
@@ -72,8 +74,7 @@ class Protocol {
     protocol_state _state;
     protocol_cmd _cmd;
     int _arg;
-    void (*_throttle_fwd)(int);
-    void (*_throttle_rev)(int);
+    void (*_cmd_handler)(protocol_cmd, int);
 };
 
 #endif

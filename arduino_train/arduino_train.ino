@@ -22,30 +22,50 @@
 Throttle throttle(THROTTLE_POWER, THROTTLE_FWD, THROTTLE_BCK);
 Solenoid turnoutLeft(TURNOUT_LEFT);
 Solenoid turnoutRight(TURNOUT_RIGHT);
-Solenoid decoupler(DECOUPLER);
+Solenoid decoupler(DECOUPLER, 750);
 
 //TrackSensor sensor1(ANALOG_0, PIN_7, 30);
 
 Protocol protocol(Serial);
 
-void throttle_fwd(int power) {
-  throttle.forward();
-  throttle.set_power(power);
-  protocol.log("throttle fwd");
-}
 
-void throttle_rev(int power) {
-  throttle.reverse();
-  throttle.set_power(power);
-  protocol.log("throttle bck");
+void handle_command(protocol_cmd cmd, int arg) {
+  switch(cmd) {
+    case PROTOCOL_CMD_THROTTLE_FWD: {
+      throttle.forward();
+      throttle.set_power(arg);
+      protocol.log("throttle fwd");
+    }
+    break;
+    case PROTOCOL_CMD_THROTTLE_REV: {
+      throttle.reverse();
+      throttle.set_power(arg);
+      protocol.log("throttle bck");
+    }
+    break;
+    case PROTOCOL_CMD_TURNOUT_LEFT: {
+      turnoutLeft.activate();
+      protocol.log("turnout left");
+    }
+    break;
+    case PROTOCOL_CMD_TURNOUT_RIGHT: {
+      turnoutRight.activate();
+      protocol.log("turnout right");
+    }
+    break;
+    case PROTOCOL_CMD_DECOUPLER: {
+      decoupler.activate();
+      protocol.log("decoupler");
+    }
+    break;
+  }
 }
 
 void setup() {
   Serial.begin(9600);
   protocol.log("Setup started");
   Timer1.initialize(1e6/PWM_HZ);
-  protocol.set_throttle_fwd(throttle_fwd);
-  protocol.set_throttle_rev(throttle_rev);
+  protocol.set_cmd_handler(handle_command);
   protocol.log("Setup complete");
 } 
 
