@@ -22,7 +22,7 @@
 Throttle throttle(THROTTLE_POWER, THROTTLE_FWD, THROTTLE_BCK);
 Solenoid turnoutLeft(TURNOUT_LEFT);
 Solenoid turnoutRight(TURNOUT_RIGHT);
-Solenoid decoupler(DECOUPLER, 750);
+Solenoid decoupler(DECOUPLER, 1000);
 
 //TrackSensor sensor1(ANALOG_0, PIN_7, 30);
 
@@ -45,17 +45,24 @@ void handle_command(protocol_cmd cmd, int arg) {
     break;
     case PROTOCOL_CMD_TURNOUT_LEFT: {
       turnoutLeft.activate();
+      turnoutRight.deactivate();
       protocol.log("turnout left");
     }
     break;
     case PROTOCOL_CMD_TURNOUT_RIGHT: {
       turnoutRight.activate();
+      turnoutLeft.deactivate();
       protocol.log("turnout right");
     }
     break;
-    case PROTOCOL_CMD_DECOUPLER: {
+    case PROTOCOL_CMD_DECOUPLER_UP: {
       decoupler.activate();
-      protocol.log("decoupler");
+      protocol.log("decoupler up");
+    }
+    break;
+    case PROTOCOL_CMD_DECOUPLER_DOWN: {
+      decoupler.deactivate();
+      protocol.log("decoupler down");
     }
     break;
   }

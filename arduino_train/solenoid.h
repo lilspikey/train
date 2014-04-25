@@ -8,6 +8,7 @@ class Solenoid {
     explicit Solenoid(int pin, int durationMillis=250);
     
     void activate();
+    void deactivate();
     void update();
   
   private:

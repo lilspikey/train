@@ -14,7 +14,9 @@ PROTOCOL_CMD_THROTTLE_FWD = 3
 PROTOCOL_CMD_THROTTLE_REV = 4
 PROTOCOL_CMD_TURNOUT_LEFT = 5
 PROTOCOL_CMD_TURNOUT_RIGHT = 6
-PROTOCOL_CMD_DECOUPLER = 7
+PROTOCOL_CMD_DECOUPLER_UP = 7
+PROTOCOL_CMD_DECOUPLER_DOWN = 8
+
 
 
 class SerialClosedException(Exception):
@@ -99,3 +101,16 @@ class SerialProtocol(object):
     def throttle_reverse(self, power):
         power = max(0, min(1024, power));
         self.cmd(PROTOCOL_CMD_THROTTLE_REV, power)
+
+    def turnout_left(self):
+        self.cmd(PROTOCOL_CMD_TURNOUT_LEFT, 0)
+
+    def turnout_right(self):
+        self.cmd(PROTOCOL_CMD_TURNOUT_RIGHT, 0)
+
+    def decoupler_up(self):
+        self.cmd(PROTOCOL_CMD_DECOUPLER_UP, 0)
+
+    def decoupler_down(self):
+        self.cmd(PROTOCOL_CMD_DECOUPLER_DOWN, 0)
+

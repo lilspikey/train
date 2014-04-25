@@ -14,13 +14,16 @@ void Solenoid::activate() {
   _prevMillis = millis();
 }
 
+void Solenoid::deactivate() {
+  digitalWrite(_pin, LOW);
+  _active = false;
+}
 
 void Solenoid::update() {
   if ( _active ) {
     unsigned long duration = millis() - _prevMillis;
     if (duration >= _durationMillis) {
-      digitalWrite(_pin, LOW);
-      _active = false;
+      deactivate();
     }
   }
 }

@@ -31,6 +31,18 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         elif 'reverse' in message:
             power = message['reverse']
             self.serial_protocol.throttle_reverse(power)
+        elif 'turnout' in message:
+            turnout = message['turnout']
+            if turnout == 'left':
+                self.serial_protocol.turnout_left()
+            else:
+                self.serial_protocol.turnout_right()
+        elif 'decoupler' in message:
+            decoupler = message['decoupler']
+            if decoupler == 'up':
+                self.serial_protocol.decoupler_up()
+            else:
+                self.serial_protocol.decoupler_down()
 
     def on_close(self):
         print("WebSocket closed")
