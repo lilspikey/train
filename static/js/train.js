@@ -44,6 +44,11 @@
             update_throttle();
         },
         up = function () {
+            var cx = this.attr("cx");
+            var midx = view_port.width/2;
+            if ( Math.abs(cx - midx) <= 40 ) {
+                this.attr("cx", midx);
+            }
             this.animate({r: 50, fill: "#f00"}, 250, ">");
             update_throttle();
         };
