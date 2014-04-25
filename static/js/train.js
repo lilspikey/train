@@ -7,7 +7,7 @@
         var throttle_reverse = function(power) {
             ws.send('{ "reverse": '+ Math.round(power) +' }');
         };
-        
+
         var view_port = { width: 640, height: 480 };
 
         var update_throttle = _.throttle(function() {
@@ -36,19 +36,47 @@
         var start = function () {
             this.ox = this.attr("cx");
             this.oy = this.attr("cy");
-            this.animate({r: 60, opacity: .5}, 250, ">");
+            this.animate({r: 60, fill: "#866"}, 250, ">");
             update_throttle();
         },
         move = function (dx, dy) {
-            this.attr({cx: this.ox + dx, cy: this.oy + dy});
+            this.attr({cx: this.ox + dx});
             update_throttle();
         },
         up = function () {
-            this.animate({r: 50, opacity: 1}, 250, ">");
+            this.animate({r: 50, fill: "#f00"}, 250, ">");
             update_throttle();
         };
         
         throttle.drag(move, start, up);
+
+        var turnout_left = layout.rect(0, 200, 100, 100, 5).
+            attr("fill", "#3f3");
+        var turnout_right = layout.rect(150, 200, 100, 100, 5).
+            attr("fill", "#686");
+
+        turnout_left.click(function() {
+            ws.send('{ "turnout": "left" }');
+            turnout_left.animate({"fill": "#3f3"}, 250, ">");
+            turnout_right.animate({"fill": "#686"}, 250, ">");
+        });
+        turnout_right.click(function() {
+            ws.send('{ "turnout": "right" }');
+            turnout_right.animate({"fill": "#3f3"}, 250, ">");
+            turnout_left.animate({"fill": "#686"}, 250, ">");
+        });
+
+        var decoupler = layout.rect(540, 200, 100, 100, 5).
+            attr("fill", "#33f");
+
+        decoupler.mousedown(function() {
+            ws.send('{ "decoupler": "up" }');
+            decoupler.animate({"fill": "#668", y: 190}, 250, ">");
+        });
+        decoupler.mouseup(function() {
+            ws.send('{ "decoupler": "down" }');
+            decoupler.animate({"fill": "#33f", y: 200}, 250, ">");
+        });
     };
     
     var host = window.location.host;
