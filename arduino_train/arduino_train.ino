@@ -11,13 +11,14 @@
 #define THROTTLE_FWD 8
 #define THROTTLE_BCK 7
 
-#define TURNOUT_LEFT 2
-#define TURNOUT_RIGHT 4
+#define TURNOUT_LEFT 6
+#define TURNOUT_RIGHT 5
 
-#define DECOUPLER 12
+#define DECOUPLER 4
 
 
-#define PWM_HZ 32000
+//#define PWM_HZ 32000
+#define PWM_HZ 60
 
 Throttle throttle(THROTTLE_POWER, THROTTLE_FWD, THROTTLE_BCK);
 Solenoid turnoutLeft(TURNOUT_LEFT);
