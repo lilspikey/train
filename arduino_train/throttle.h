@@ -9,17 +9,21 @@ class Throttle {
   
   public:
     explicit Throttle(int powerPin, int forwardPin, int backwardPin);
-    int power();
-    void set_power(int power);
+    int getPower();
+    void setPower(int power);
+    bool isForward();
     void forward();
     void reverse();
-    void update();
+    bool update();
   
   private:
     int _powerPin;
     int _forwardPin;
     int _backwardPin;
+    bool _forward;
     int _power;
+    bool _prevForward;
+    int _prevPower;
   
 };
 

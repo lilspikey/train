@@ -62,7 +62,7 @@ class Frame(object):
         while True:
             b = self._read(stop)
             if b == FRAME_ESCAPE_BYTE:
-                e = self._read() ^ FRAME_ESCAPE_MASK
+                e = self._read(stop) ^ FRAME_ESCAPE_MASK
                 frame.append(e)
             elif b == FRAME_END_BYTE:
                 break
@@ -72,21 +72,41 @@ class Frame(object):
 
 
 class SerialProtocol(object):
-    def __init__(self, port):
+    def __init__(self, port, callback):
         self.frame = Frame(port)
         self.stop = threading.Event()
+        self.callback = callback
         reader = threading.Thread(target=self.read_frames)
         reader.start()
     
     def __del__(self):
         self.stop.set()
+    
+    def _read_string(self, bytes):
+        len, data = bytes[0], bytes[1:]
+        return data[:len].decode('ascii'), data[len:]
+
+    def _read_int(self, bytes):
+        unpacked = struct.unpack('>H', bytes)
+        i = unpacked[0]
+        return i, None
+
+    def decode_frame(self, frame):
+        cmd, data = frame[0], frame[1:]
+        if cmd == PROTOCOL_CMD_LOG:
+            log, _ = self._read_string(data)
+            print('LOG:', log)
+        elif cmd == PROTOCOL_CMD_STATUS:
+            key, remaining = self._read_string(data)
+            value, _ = self._read_int(remaining)
+            self.callback(key, value)
 
     def read_frames(self):
         print("Reading frames")
         while not self.stop.is_set():
             try:
                 frame = self.frame.read_frame(self.stop)
-                print(frame)
+                self.decode_frame(frame)
             except SerialClosedException:
                 pass
 

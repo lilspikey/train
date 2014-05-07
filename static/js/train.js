@@ -57,7 +57,7 @@
 
         var turnout_left = layout.rect(0, 200, 100, 100, 5).
             attr("fill", "#3f3");
-        var turnout_right = layout.rect(150, 200, 100, 100, 5).
+        var turnout_right = layout.rect(160, 200, 100, 100, 5).
             attr("fill", "#686");
 
         turnout_left.click(function() {
@@ -88,6 +88,9 @@
     var ws = new WebSocket("ws://"+host+"/ws");
     ws.onopen = function() {
         onopen(ws);
+    };
+    ws.onmessage = function(evt) {
+        console.log(evt.data);
     };
     
 })();

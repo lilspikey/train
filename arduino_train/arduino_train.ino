@@ -30,40 +30,35 @@ Solenoid decoupler(DECOUPLER, 1000);
 Protocol protocol(Serial);
 
 
-void handle_command(protocol_cmd cmd, int arg) {
+void handle_command(protocol_cmd cmd, unsigned int arg) {
+  protocol.log("handle_command");
   switch(cmd) {
     case PROTOCOL_CMD_THROTTLE_FWD: {
       throttle.forward();
-      throttle.set_power(arg);
-      protocol.log("throttle fwd");
+      throttle.setPower(arg);
     }
     break;
     case PROTOCOL_CMD_THROTTLE_REV: {
       throttle.reverse();
-      throttle.set_power(arg);
-      protocol.log("throttle bck");
+      throttle.setPower(arg);
     }
     break;
     case PROTOCOL_CMD_TURNOUT_LEFT: {
       turnoutLeft.activate();
       turnoutRight.deactivate();
-      protocol.log("turnout left");
     }
     break;
     case PROTOCOL_CMD_TURNOUT_RIGHT: {
       turnoutRight.activate();
       turnoutLeft.deactivate();
-      protocol.log("turnout right");
     }
     break;
     case PROTOCOL_CMD_DECOUPLER_UP: {
       decoupler.activate();
-      protocol.log("decoupler up");
     }
     break;
     case PROTOCOL_CMD_DECOUPLER_DOWN: {
       decoupler.deactivate();
-      protocol.log("decoupler down");
     }
     break;
   }
@@ -75,14 +70,23 @@ void setup() {
   Timer1.initialize(1e6/PWM_HZ);
   protocol.set_cmd_handler(handle_command);
   protocol.log("Setup complete");
-} 
+}
 
 void loop() {
   for ( int i = 0; i < 16 && Serial.available() > 0; i++ ) {
     protocol.receive();
   }
-  throttle.update();
-  turnoutLeft.update();
-  turnoutRight.update();
-  decoupler.update();
+  if ( throttle.update() ) {
+    protocol.status("forward", throttle.isForward());
+    protocol.status("power", throttle.getPower());
+  }
+  if ( turnoutLeft.update() ) {
+    protocol.status("turnoutLeft", turnoutLeft.isActive());
+  }
+  if ( turnoutRight.update() ) {
+    protocol.status("turnoutRight", turnoutRight.isActive());
+  }
+  if ( decoupler.update() ) {
+    protocol.status("decoupler", decoupler.isActive());
+  }
 }

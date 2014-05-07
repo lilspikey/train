@@ -111,6 +111,14 @@ void Protocol::log(const char* msg) {
   _frame.end();
 }
 
+void Protocol::status(const char* key, unsigned int value) {
+  _frame.begin();
+  _frame.write(PROTOCOL_CMD_STATUS);
+  write(key);
+  write(value);
+  _frame.end();
+}
+
 void Protocol::write(const char* msg) {
   // only send up to 255 chars
   byte len = strlen(msg);
@@ -120,7 +128,12 @@ void Protocol::write(const char* msg) {
   }
 }
 
-void Protocol::received(protocol_cmd cmd, int arg) {
+void Protocol::write(unsigned int value) {
+  _frame.write((value >> 8) & 0xFF);
+  _frame.write((value) & 0xFF);
+}
+
+void Protocol::received(protocol_cmd cmd, unsigned int arg) {
   log("received command");
   if ( _cmd_handler ) {
     _cmd_handler(cmd, arg);

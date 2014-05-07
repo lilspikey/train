@@ -3,10 +3,13 @@
 
 
 Solenoid::Solenoid(int pin, int durationMillis)
-  : _pin(pin), _active(false), _durationMillis(durationMillis), _prevMillis(0) {
+  : _pin(pin), _active(false), _prevActive(true), _durationMillis(durationMillis), _prevMillis(0) {
   pinMode(_pin, OUTPUT);  
 }
 
+bool Solenoid::isActive() {
+  return _active;
+}
 
 void Solenoid::activate() {
   _active = true;
@@ -19,12 +22,16 @@ void Solenoid::deactivate() {
   _active = false;
 }
 
-void Solenoid::update() {
+bool Solenoid::update() {
   if ( _active ) {
     unsigned long duration = millis() - _prevMillis;
     if (duration >= _durationMillis) {
       deactivate();
     }
   }
+  
+  bool changed = _prevActive != _active;
+  _prevActive = _active;
+  return changed;
 }
 

@@ -64,18 +64,20 @@ class Protocol {
     explicit Protocol(Stream& stream);
     void receive();
     void log(const char* msg);
-    void set_cmd_handler(void (*cmd_handler)(protocol_cmd, int)) { _cmd_handler = cmd_handler; };
+    void status(const char* key, unsigned int value);
+    void set_cmd_handler(void (*cmd_handler)(protocol_cmd, unsigned int)) { _cmd_handler = cmd_handler; };
   
   protected:
-    void received(protocol_cmd cmd, int arg);
+    void received(protocol_cmd cmd, unsigned int arg);
     void write(const char* msg);
+    void write(unsigned int value);
   
   private:
     Frame _frame;
     protocol_state _state;
     protocol_cmd _cmd;
     int _arg;
-    void (*_cmd_handler)(protocol_cmd, int);
+    void (*_cmd_handler)(protocol_cmd, unsigned int);
 };
 
 #endif
