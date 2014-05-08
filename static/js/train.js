@@ -5,17 +5,29 @@
     var ThrottleView = Backbone.View.extend({
         initialize: function(options){
             this.throttle_range = options.throttle_range;
+            this._down = false;
             this.listenTo(this.model, "change:forward", this.update);
             this.listenTo(this.model, "change:power", this.update);
             this.el.mousedown(_.bind(this.onMousedown, this));
+            this.el.mousemove(_.bind(this.onMousemove, this));
             this.throttle_range.mousedown(_.bind(this.onMousedown, this));
+            this.throttle_range.mousemove(_.bind(this.onMousemove, this));
             this.el.mouseup(_.bind(this.onMouseup, this));
             this.throttle_range.mouseup(_.bind(this.onMouseup, this));
         },
         onMousedown: function(event) {
             this.el.animate({r: 60, fill: "#866"}, 250, ">");
-            var bnds = event.target.getBoundingClientRect();
-            var mx = event.clientX - bnds.left
+            this._down = true;
+            this.handleThrottle(event);
+        },
+        onMousemove: function(event) {
+            if ( this._down ) {
+                this.handleThrottle(event);
+            }
+        },
+        handleThrottle: function(event) {
+            var bnds = throttle_range[0].getBoundingClientRect();
+            var mx = event.x - bnds.left;
             var fx = Math.max(0, Math.min(1, mx/bnds.width));
             if ( fx < 0.45 ) {
                 throttle_reverse(2*1024*(0.5-fx));
@@ -28,6 +40,7 @@
             }
         },
         onMouseup: function() {
+            this._down = false;
             this.el.animate({r: 50, fill: "#f00"}, 250, ">");
         },
         update: function() {
@@ -65,13 +78,13 @@
         }
     };
 
-    var throttle_forward = function(power) {
+    var throttle_forward = _.throttle(function(power) {
         ws.send('{ "forward": '+ Math.round(power) +' }');
-    };
+    }, 100);
 
-    var throttle_reverse = function(power) {
+    var throttle_reverse = _.throttle(function(power) {
         ws.send('{ "reverse": '+ Math.round(power) +' }');
-    };
+    }, 100);
 
     var view_port = { width: 640, height: 480 };
     var layout = Raphael('layout', "100%", "100%");

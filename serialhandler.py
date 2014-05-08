@@ -115,11 +115,11 @@ class SerialProtocol(object):
             frame.write(struct.pack('>BH', cmd_id, arg))
 
     def throttle_forward(self, power):
-        power = max(0, min(1024, power));
+        power = max(0, min(1024, int(power)));
         self.cmd(PROTOCOL_CMD_THROTTLE_FWD, power)
 
     def throttle_reverse(self, power):
-        power = max(0, min(1024, power));
+        power = max(0, min(1024, int(power)));
         self.cmd(PROTOCOL_CMD_THROTTLE_REV, power)
 
     def turnout_left(self):
