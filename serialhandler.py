@@ -99,6 +99,8 @@ class SerialProtocol(object):
         elif cmd == PROTOCOL_CMD_STATUS:
             key, remaining = self._read_string(data)
             value, _ = self._read_int(remaining)
+            if key == 'turnout':
+                value = 'left' if value else 'right';
             self.callback(key, value)
 
     def read_frames(self):

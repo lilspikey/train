@@ -2,6 +2,7 @@
 #include "track_sensor.h"
 #include "throttle.h"
 #include "solenoid.h"
+#include "turnout.h"
 #include "protocol.h"
 
 #define ANALOG_0 0
@@ -23,6 +24,7 @@
 Throttle throttle(THROTTLE_POWER, THROTTLE_FWD, THROTTLE_BCK);
 Solenoid turnoutLeft(TURNOUT_LEFT);
 Solenoid turnoutRight(TURNOUT_RIGHT);
+Turnout turnout(turnoutLeft, turnoutRight);
 Solenoid decoupler(DECOUPLER, 1000);
 
 //TrackSensor sensor1(ANALOG_0, PIN_7, 30);
@@ -44,13 +46,11 @@ void handle_command(protocol_cmd cmd, unsigned int arg) {
     }
     break;
     case PROTOCOL_CMD_TURNOUT_LEFT: {
-      turnoutLeft.activate();
-      turnoutRight.deactivate();
+      turnout.left();
     }
     break;
     case PROTOCOL_CMD_TURNOUT_RIGHT: {
-      turnoutRight.activate();
-      turnoutLeft.deactivate();
+      turnout.right();
     }
     break;
     case PROTOCOL_CMD_DECOUPLER_UP: {
@@ -70,6 +70,7 @@ void setup() {
   Timer1.initialize(1e6/PWM_HZ);
   protocol.set_cmd_handler(handle_command);
   protocol.log("Setup complete");
+  turnout.left();
 }
 
 void loop() {
@@ -80,11 +81,8 @@ void loop() {
     protocol.status("forward", throttle.isForward());
     protocol.status("power", throttle.getPower());
   }
-  if ( turnoutLeft.update() ) {
-    protocol.status("turnoutLeft", turnoutLeft.isActive());
-  }
-  if ( turnoutRight.update() ) {
-    protocol.status("turnoutRight", turnoutRight.isActive());
+  if ( turnout.update() ) {
+    protocol.status("turnout", turnout.isDirectionLeft());
   }
   if ( decoupler.update() ) {
     protocol.status("decoupler", decoupler.isActive());

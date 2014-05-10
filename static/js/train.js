@@ -59,12 +59,30 @@
         }
     });
 
+    var TurnoutView = Backbone.View.extend({
+        initialize: function(options){
+            this.direction = options.direction;
+            this.listenTo(this.model, "change:turnout", this.update);
+            this.el.click(_.bind(this.onClick, this));
+        },
+        onClick: function() {
+            turnout(this.direction);
+        },
+        update: function() {
+            if ( this.model.get('turnout') == this.direction ) {
+                this.el.animate({"fill": "#3f3"}, 250, ">");
+            }
+            else {
+                this.el.animate({"fill": "#686"}, 250, ">");
+            }
+        }
+    });
+
     var status = new Status({
         forward: true,
         power: 0,
         decoupler: 0,
-        turnoutLeft: 0,
-        turnoutRight: 0
+        turnout: 'left'
     });
 
     var host = window.location.host;
@@ -86,6 +104,10 @@
         ws.send('{ "reverse": '+ Math.round(power) +' }');
     }, 100);
 
+    var turnout = function(direction) {
+        ws.send('{ "turnout": "' + direction + '" }');
+    };
+
     var view_port = { width: 640, height: 480 };
     var layout = Raphael('layout', "100%", "100%");
     layout.setViewBox(0, 0, view_port.width, view_port.height, true);
@@ -96,15 +118,53 @@
     layout.path('M480 40L480 440').attr("stroke", "#ccc");
     layout.path('M640 20L640 460').attr("stroke", "#999");
     
-    var throttle_range = layout.rect(0, 50, view_port.width, 100).
-         attr({ fill: "#333", stroke: "#aaa", 'stroke-width': 40});
-
-    var throttle = layout.circle(320, 100, 50).
-         attr("fill", "#f00");
+    var elements = layout.add([
+        {
+            type: 'rect',
+            x: 0,
+            y: 50,
+            width: view_port.width,
+            height: 100,
+            fill: '#333',
+            stroke: '#aaa',
+            'stroke-width': 40
+        },
+        {
+            type: 'circle',
+            cx: 320,
+            cy: 100,
+            r: 50,
+            fill: '#f00'
+        },
+        {
+            type: 'rect',
+            x: 0,
+            y: 200,
+            width: 100,
+            height: 100,
+            r: 5,
+            fill: '#3f3'
+        },
+        {
+            type: 'rect',
+            x: 160,
+            y: 200,
+            width: 100,
+            height: 100,
+            r: 5,
+            fill: '#686'
+        }
+    ]);
+    var throttle_range = elements[0]
+    var throttle = elements[1];
+    var turnout_left = elements[2];
+    var turnout_right = elements[3];
 
     var throttle_view = new ThrottleView({model: status, el: throttle, throttle_range: throttle_range});
     throttle_view.update();
 
+    var turnout_left_view = new TurnoutView({model: status, el: turnout_left, direction: 'left'});
+    var turnout_right_view = new TurnoutView({model: status, el: turnout_right, direction: 'right'});
 
     /*    var start = function () {
             this.ox = this.attr("cx");
