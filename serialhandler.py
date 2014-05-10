@@ -101,6 +101,8 @@ class SerialProtocol(object):
             value, _ = self._read_int(remaining)
             if key == 'turnout':
                 value = 'left' if value else 'right';
+            elif key == 'decoupler':
+                value = 'up' if value else 'down';
             self.callback(key, value)
 
     def read_frames(self):

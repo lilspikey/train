@@ -26,7 +26,7 @@
             }
         },
         handleThrottle: function(event) {
-            var bnds = throttle_range[0].getBoundingClientRect();
+            var bnds = this.throttle_range[0].getBoundingClientRect();
             var mx = event.x - bnds.left;
             var fx = Math.max(0, Math.min(1, mx/bnds.width));
             if ( fx < 0.45 ) {
@@ -78,11 +78,35 @@
         }
     });
 
+    var DecouplerView = Backbone.View.extend({
+        initialize: function(options){
+            this.direction = options.direction;
+            this.listenTo(this.model, "change:decoupler", this.update);
+            this.el.mousedown(_.bind(this.onMousedown, this));
+            this.el.mouseup(_.bind(this.onMouseup, this));
+        },
+        onMousedown: function() {
+            decoupler('up');
+        },
+        onMouseup: function() {
+            decoupler('down');
+        },
+        update: function() {
+            var state = this.model.get('decoupler');
+            if ( state == 'up' ) {
+                this.el.animate({"fill": "#668", y: 190}, 250, ">");
+            }
+            else if ( state == 'down' ) {
+                this.el.animate({"fill": "#33f", y: 200}, 250, ">");
+            }
+        }
+    });
+
     var status = new Status({
         forward: true,
         power: 0,
-        decoupler: 0,
-        turnout: 'left'
+        decoupler: '',
+        turnout: ''
     });
 
     var host = window.location.host;
@@ -107,7 +131,10 @@
     var turnout = function(direction) {
         ws.send('{ "turnout": "' + direction + '" }');
     };
-
+    var decoupler = function(direction) {
+        ws.send('{ "decoupler": "' + direction + '" }');
+    };
+    
     var view_port = { width: 640, height: 480 };
     var layout = Raphael('layout', "100%", "100%");
     layout.setViewBox(0, 0, view_port.width, view_port.height, true);
@@ -153,69 +180,30 @@
             height: 100,
             r: 5,
             fill: '#686'
+        },
+        {
+            type: 'rect',
+            x: 540,
+            y: 200,
+            width: 100,
+            height: 100,
+            r: 5,
+            fill: "#33f"
         }
     ]);
-    var throttle_range = elements[0]
-    var throttle = elements[1];
-    var turnout_left = elements[2];
-    var turnout_right = elements[3];
+    elements = {
+        throttle_range: elements[0],
+        throttle: elements[1],
+        turnout_left: elements[2],
+        turnout_right: elements[3],
+        decoupler: elements[4]
+    }
 
-    var throttle_view = new ThrottleView({model: status, el: throttle, throttle_range: throttle_range});
+    var throttle_view = new ThrottleView({model: status, el: elements.throttle, throttle_range: elements.throttle_range});
     throttle_view.update();
 
-    var turnout_left_view = new TurnoutView({model: status, el: turnout_left, direction: 'left'});
-    var turnout_right_view = new TurnoutView({model: status, el: turnout_right, direction: 'right'});
-
-    /*    var start = function () {
-            this.ox = this.attr("cx");
-            this.oy = this.attr("cy");
-            this.animate({r: 60, fill: "#866"}, 250, ">");
-            update_throttle();
-        },
-        move = function (dx, dy) {
-            this.attr({cx: this.ox + dx});
-            update_throttle();
-        },
-        up = function () {
-            var cx = this.attr("cx");
-            var midx = view_port.width/2;
-            if ( Math.abs(cx - midx) <= 40 ) {
-                this.attr("cx", midx);
-            }
-            this.animate({r: 50, fill: "#f00"}, 250, ">");
-            update_throttle();
-        };
-        
-        throttle.drag(move, start, up);
-
-        var turnout_left = layout.rect(0, 200, 100, 100, 5).
-            attr("fill", "#3f3");
-        var turnout_right = layout.rect(160, 200, 100, 100, 5).
-            attr("fill", "#686");
-
-        turnout_left.click(function() {
-            ws.send('{ "turnout": "left" }');
-            turnout_left.animate({"fill": "#3f3"}, 250, ">");
-            turnout_right.animate({"fill": "#686"}, 250, ">");
-        });
-        turnout_right.click(function() {
-            ws.send('{ "turnout": "right" }');
-            turnout_right.animate({"fill": "#3f3"}, 250, ">");
-            turnout_left.animate({"fill": "#686"}, 250, ">");
-        });
-
-        var decoupler = layout.rect(540, 200, 100, 100, 5).
-            attr("fill", "#33f");
-
-        decoupler.mousedown(function() {
-            ws.send('{ "decoupler": "up" }');
-            decoupler.animate({"fill": "#668", y: 190}, 250, ">");
-        });
-        decoupler.mouseup(function() {
-            ws.send('{ "decoupler": "down" }');
-            decoupler.animate({"fill": "#33f", y: 200}, 250, ">");
-        });
-    };
-    */
+    var turnout_left_view = new TurnoutView({model: status, el: elements.turnout_left, direction: 'left'});
+    var turnout_right_view = new TurnoutView({model: status, el:elements. turnout_right, direction: 'right'});
     
+    var decoupler_view = new DecouplerView({model: status, el: elements.decoupler});
 })();
