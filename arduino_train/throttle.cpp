@@ -10,14 +10,13 @@ Throttle::Throttle(int powerPin, int forwardPin, int backwardPin)
    _backwardPin(backwardPin),
    _forward(true),
    _power(0),
-   _targetForward(true),
+   _targetForward(false),
    _targetPower(0),
    _waitCount(0),
    _prevMillis(0) {
   pinMode(_powerPin, OUTPUT);
   pinMode(_forwardPin, OUTPUT);
   pinMode(_backwardPin, OUTPUT);
-  forward();
 }
 
 int Throttle::getPower() {
@@ -30,27 +29,25 @@ bool Throttle::isForward() {
 
 void Throttle::forward() {
   _targetForward = true;
-  digitalWrite(_forwardPin, HIGH);
-  digitalWrite(_backwardPin, LOW);  
 }
 
 void Throttle::reverse() {
   _targetForward = false;
-  digitalWrite(_forwardPin, LOW);
-  digitalWrite(_backwardPin, HIGH); 
 }
 
 void Throttle::setPower(int power) {
   _targetPower = power;
-  Timer1.pwm(_powerPin, power);
 }
 
 bool Throttle::updatePower(int targetPower) {
   int prevPower = _power;
   int accel = min(100, abs(_power - targetPower));
   _power += (_power < targetPower)? accel : -accel;
-  Timer1.pwm(_powerPin, _power);
-  return _power != prevPower;
+  if ( _power != prevPower ) {
+    Timer1.pwm(_powerPin, _power);
+    return true;
+  }
+  return false;
 }
 
 bool Throttle::update() {
