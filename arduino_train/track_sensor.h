@@ -4,15 +4,15 @@
 class TrackSensor {
   
   public:
-    explicit TrackSensor(int analogPin, int irLEDPin, int difference);
-    bool read(void);
+    explicit TrackSensor(int analogPin, int irLEDPin, int difference=30);
+    bool update(void);
+    bool isTriggered(void);
   
   private:
     int _analogPin;
     int _irLEDPin;
     int _difference;
     int _correctCount;
-  
 };
 
 #endif

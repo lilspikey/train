@@ -5,8 +5,15 @@
 #include "turnout.h"
 #include "protocol.h"
 
-#define ANALOG_0 0
-#define PIN_7 7
+// TODO perhaps try running all sensors from couple of pins
+// probably need to use a transistor, to avoid pulling too
+// much current on each pin
+#define SENSOR_1 2
+#define SENSOR_2 3
+#define SENSOR_3 10
+#define SENSOR_4 11
+#define SENSOR_5 12
+#define SENSOR_6 13
 
 #define THROTTLE_POWER 9
 #define THROTTLE_FWD 8
@@ -17,7 +24,6 @@
 
 #define DECOUPLER 4
 
-
 //#define PWM_HZ 32000
 #define PWM_HZ 60
 
@@ -27,10 +33,14 @@ Solenoid turnoutRight(TURNOUT_RIGHT);
 Turnout turnout(turnoutLeft, turnoutRight);
 Solenoid decoupler(DECOUPLER, 1000);
 
-//TrackSensor sensor1(ANALOG_0, PIN_7, 30);
+TrackSensor sensor1(0, SENSOR_1);
+TrackSensor sensor2(1, SENSOR_2);
+TrackSensor sensor3(2, SENSOR_3);
+TrackSensor sensor4(3, SENSOR_4);
+TrackSensor sensor5(4, SENSOR_5);
+TrackSensor sensor6(5, SENSOR_6);
 
 Protocol protocol(Serial);
-
 
 void handle_command(protocol_cmd cmd, unsigned int arg) {
   protocol.log("handle_command");
@@ -73,6 +83,12 @@ void setup() {
   turnout.left();
 }
 
+void checkSensor(TrackSensor& sensor, const char* name) {
+  if ( sensor.update() ) {
+    protocol.status(name, sensor.isTriggered());  
+  }
+}
+
 void loop() {
   for ( int i = 0; i < 16 && Serial.available() > 0; i++ ) {
     protocol.receive();
@@ -87,4 +103,10 @@ void loop() {
   if ( decoupler.update() ) {
     protocol.status("decoupler", decoupler.isActive());
   }
+  checkSensor(sensor1, "sensor1");
+  checkSensor(sensor2, "sensor2");
+  checkSensor(sensor3, "sensor3");
+  checkSensor(sensor4, "sensor4");
+  checkSensor(sensor5, "sensor5");
+  checkSensor(sensor6, "sensor6");  
 }
