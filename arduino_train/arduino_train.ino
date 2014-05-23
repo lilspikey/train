@@ -4,6 +4,7 @@
 #include "solenoid.h"
 #include "turnout.h"
 #include "protocol.h"
+#include "flash_string.h"
 
 // TODO perhaps try running all sensors from couple of pins
 // probably need to use a transistor, to avoid pulling too
@@ -42,8 +43,14 @@ TrackSensor sensor6(5, SENSOR_6);
 
 Protocol protocol(Serial);
 
+int free_ram () {
+  extern int __heap_start, *__brkval; 
+  int v; 
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
+}
+
 void handle_command(protocol_cmd cmd, unsigned int arg) {
-  protocol.log("handle_command");
+  protocol.log(FS("handle_command"));
   switch(cmd) {
     case PROTOCOL_CMD_THROTTLE_FWD: {
       throttle.forward();
@@ -76,14 +83,14 @@ void handle_command(protocol_cmd cmd, unsigned int arg) {
 
 void setup() {
   Serial.begin(9600);
-  protocol.log("Setup started");
+  protocol.log(FS("Setup started"));
   Timer1.initialize(1e6/PWM_HZ);
   protocol.set_cmd_handler(handle_command);
-  protocol.log("Setup complete");
+  protocol.log(FS("Setup complete"));
   turnout.left();
 }
 
-void checkSensor(TrackSensor& sensor, const char* name) {
+void checkSensor(TrackSensor& sensor, const FlashString& name) {
   if ( sensor.update() ) {
     protocol.status(name, sensor.isTriggered());  
   }
@@ -94,19 +101,20 @@ void loop() {
     protocol.receive();
   }
   if ( throttle.update() ) {
-    protocol.status("forward", throttle.isForward());
-    protocol.status("power", throttle.getPower());
+    protocol.status(FS("forward"), throttle.isForward());
+    protocol.status(FS("power"), throttle.getPower());
   }
   if ( turnout.update() ) {
-    protocol.status("turnout", turnout.isDirectionLeft());
+    protocol.status(FS("turnout"), turnout.isDirectionLeft());
   }
   if ( decoupler.update() ) {
-    protocol.status("decoupler", decoupler.isActive());
+    protocol.status(FS("decoupler"), decoupler.isActive());
   }
-  checkSensor(sensor1, "sensor1");
-  checkSensor(sensor2, "sensor2");
-  checkSensor(sensor3, "sensor3");
-  checkSensor(sensor4, "sensor4");
-  checkSensor(sensor5, "sensor5");
-  checkSensor(sensor6, "sensor6");  
+  checkSensor(sensor1, FS("sensor1"));
+  checkSensor(sensor2, FS("sensor2"));
+  checkSensor(sensor3, FS("sensor3"));
+  checkSensor(sensor4, FS("sensor4"));
+  checkSensor(sensor5, FS("sensor5"));
+  checkSensor(sensor6, FS("sensor6"));
+  //Serial.println(free_ram());
 }

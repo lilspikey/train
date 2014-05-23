@@ -63,13 +63,13 @@ class Protocol {
   public:
     explicit Protocol(Stream& stream);
     void receive();
-    void log(const char* msg);
-    void status(const char* key, unsigned int value);
+    void log(const String& msg);
+    void status(const String& key, unsigned int value);
     void set_cmd_handler(void (*cmd_handler)(protocol_cmd, unsigned int)) { _cmd_handler = cmd_handler; };
   
   protected:
     void received(protocol_cmd cmd, unsigned int arg);
-    void write(const char* msg);
+    void write(const String& msg);
     void write(unsigned int value);
   
   private:
