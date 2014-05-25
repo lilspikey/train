@@ -15,13 +15,13 @@ bool TrackSensor::update(void) {
   bool prevTriggered = isTriggered();
   digitalWrite(_irLEDPin, HIGH);
   delayMicroseconds(500 + random(700));
-  int readingHigh = analogRead(_analogPin);
+  int readingOn = analogRead(_analogPin);
+
   digitalWrite(_irLEDPin, LOW);
   delayMicroseconds(500 + random(700));
-  int readingLow = analogRead(_analogPin);
+  int readingOff = analogRead(_analogPin);
   
-  int difference = readingLow - readingHigh;
-  
+  int difference = readingOff - readingOn;
   if ( difference > _difference ) {
     if ( _correctCount < CORRECT_THRESHOLD ) {
       _correctCount++;
@@ -29,7 +29,7 @@ bool TrackSensor::update(void) {
   }
   else {
     _correctCount = 0;
-  }  
+  }
   return prevTriggered != isTriggered();
 }
 

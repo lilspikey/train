@@ -102,6 +102,22 @@
         }
     });
 
+    var SensorView = Backbone.View.extend({
+        initialize: function(options) {
+            this.name = options.name;
+            this.listenTo(this.model, "change:" + this.name, this.update);
+        },
+        update: function() {
+            var on = this.model.get(this.name);
+            if ( on ) {
+                this.el.animate({"fill": "#f90"}, 50, ">");
+            }
+            else {
+                this.el.animate({"fill": "#630"}, 50, ">");
+            }
+        }
+    });
+
     var status = new Status({
         forward: true,
         power: 0,
@@ -191,12 +207,30 @@
             fill: "#33f"
         }
     ]);
+
+    var sensors = [];
+    var sensors_width = 5 * view_port.width/6;
+    var lx = (view_port.width - sensors_width)/2 - 25;
+    for ( var i = 0; i < 6; i++ ) {
+        var x = lx + (i * view_port.width)/6;
+        sensors.push({
+            type: 'rect',
+            x: x,
+            y: 350,
+            width: 50,
+            height: 50,
+            r: 5,
+            fill: '#630'
+        });
+    }
+    sensors = layout.add(sensors);
     elements = {
         throttle_range: elements[0],
         throttle: elements[1],
         turnout_left: elements[2],
         turnout_right: elements[3],
-        decoupler: elements[4]
+        decoupler: elements[4],
+        sensors: sensors
     }
 
     var throttle_view = new ThrottleView({model: status, el: elements.throttle, throttle_range: elements.throttle_range});
@@ -206,4 +240,10 @@
     var turnout_right_view = new TurnoutView({model: status, el:elements. turnout_right, direction: 'right'});
     
     var decoupler_view = new DecouplerView({model: status, el: elements.decoupler});
+
+    for ( var i = 0; i < elements.sensors.length; i++ ) {
+        var name = 'sensor' + (i+1);
+        status.set(name, false);
+        var sensor_view = new SensorView({model: status, el: elements.sensors[i], name: name});
+    }
 })();
