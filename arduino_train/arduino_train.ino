@@ -6,15 +6,8 @@
 #include "protocol.h"
 #include "flash_string.h"
 
-// TODO perhaps try running all sensors from couple of pins
-// probably need to use a transistor, to avoid pulling too
-// much current on each pin
-#define SENSOR_1 2
-#define SENSOR_2 3
-#define SENSOR_3 10
-#define SENSOR_4 11
-#define SENSOR_5 12
-#define SENSOR_6 13
+#define SENSOR_ON1 2
+#define SENSOR_ON2 3
 
 #define THROTTLE_POWER 9
 #define THROTTLE_FWD 8
@@ -34,12 +27,14 @@ Solenoid turnoutRight(TURNOUT_RIGHT);
 Turnout turnout(turnoutLeft, turnoutRight);
 Solenoid decoupler(DECOUPLER, 1000);
 
-TrackSensor sensor1(0, SENSOR_1);
-TrackSensor sensor2(1, SENSOR_2);
-TrackSensor sensor3(2, SENSOR_3);
-TrackSensor sensor4(3, SENSOR_4);
-TrackSensor sensor5(4, SENSOR_5);
-TrackSensor sensor6(5, SENSOR_6);
+// sensors are turned on and off by a pair of transistors
+// so share pins for output, but each has own pin for input (obviously)
+TrackSensor sensor1(0, SENSOR_ON1);
+TrackSensor sensor2(1, SENSOR_ON2);
+TrackSensor sensor3(2, SENSOR_ON1);
+TrackSensor sensor4(3, SENSOR_ON2);
+TrackSensor sensor5(4, SENSOR_ON1);
+TrackSensor sensor6(5, SENSOR_ON2);
 
 Protocol protocol(Serial);
 
