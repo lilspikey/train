@@ -10,24 +10,30 @@
             this.listenTo(this.model, "change:power", this.update);
             this.el.mousedown(_.bind(this.onMousedown, this));
             this.el.mousemove(_.bind(this.onMousemove, this));
+            this.el.touchmove(_.bind(this.onTouchmove, this));
             this.throttle_range.mousedown(_.bind(this.onMousedown, this));
             this.throttle_range.mousemove(_.bind(this.onMousemove, this));
+            this.throttle_range.touchmove(_.bind(this.onTouchmove, this));
             this.el.mouseup(_.bind(this.onMouseup, this));
             this.throttle_range.mouseup(_.bind(this.onMouseup, this));
         },
         onMousedown: function(event) {
             this.el.animate({r: 60, fill: "#866"}, 250, ">");
             this._down = true;
-            this.handleThrottle(event);
+            this.handleThrottle(event.pageX);
         },
         onMousemove: function(event) {
             if ( this._down ) {
-                this.handleThrottle(event);
+                this.handleThrottle(event.pageX);
             }
         },
-        handleThrottle: function(event) {
+        onTouchmove: function(event) {
+            event.preventDefault();
+            this.handleThrottle(event.touches[0].pageX);
+        },
+        handleThrottle: function(x) {
             var bnds = this.throttle_range[0].getBoundingClientRect();
-            var mx = event.x - bnds.left;
+            var mx = x - bnds.left;
             var fx = Math.max(0, Math.min(1, mx/bnds.width));
             if ( fx < 0.45 ) {
                 throttle_reverse(2*1024*(0.5-fx));
@@ -98,22 +104,6 @@
             }
             else if ( state == 'down' ) {
                 this.el.animate({"fill": "#33f", y: 200}, 250, ">");
-            }
-        }
-    });
-
-    var SensorView = Backbone.View.extend({
-        initialize: function(options) {
-            this.name = options.name;
-            this.listenTo(this.model, "change:" + this.name, this.update);
-        },
-        update: function() {
-            var on = this.model.get(this.name);
-            if ( on ) {
-                this.el.animate({"fill": "#f90"}, 50, ">");
-            }
-            else {
-                this.el.animate({"fill": "#630"}, 50, ">");
             }
         }
     });
@@ -207,30 +197,12 @@
             fill: "#33f"
         }
     ]);
-
-    var sensors = [];
-    var sensors_width = 5 * view_port.width/6;
-    var lx = (view_port.width - sensors_width)/2 - 25;
-    for ( var i = 0; i < 6; i++ ) {
-        var x = lx + (i * view_port.width)/6;
-        sensors.push({
-            type: 'rect',
-            x: x,
-            y: 350,
-            width: 50,
-            height: 50,
-            r: 5,
-            fill: '#630'
-        });
-    }
-    sensors = layout.add(sensors);
     elements = {
         throttle_range: elements[0],
         throttle: elements[1],
         turnout_left: elements[2],
         turnout_right: elements[3],
-        decoupler: elements[4],
-        sensors: sensors
+        decoupler: elements[4]
     }
 
     var throttle_view = new ThrottleView({model: status, el: elements.throttle, throttle_range: elements.throttle_range});
@@ -241,9 +213,4 @@
     
     var decoupler_view = new DecouplerView({model: status, el: elements.decoupler});
 
-    for ( var i = 0; i < elements.sensors.length; i++ ) {
-        var name = 'sensor' + (i+1);
-        status.set(name, false);
-        var sensor_view = new SensorView({model: status, el: elements.sensors[i], name: name});
-    }
 })();

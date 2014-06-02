@@ -41,7 +41,7 @@ void Throttle::setPower(int power) {
 
 bool Throttle::updatePower(int targetPower) {
   int prevPower = _power;
-  int accel = min(100, abs(_power - targetPower));
+  int accel = min(500, abs(_power - targetPower));
   _power += (_power < targetPower)? accel : -accel;
   if ( _power != prevPower ) {
     Timer1.pwm(_powerPin, _power);
@@ -71,7 +71,7 @@ bool Throttle::update() {
       case THROTTLE_STOPPING: {
         changed = updatePower(0);
         if ( !changed ) {
-          _waitCount = 5;
+          _waitCount = 10;
           _state = THROTTLE_STOPPED;
         }
       }
