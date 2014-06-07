@@ -35,11 +35,12 @@
             var bnds = this.throttle_range[0].getBoundingClientRect();
             var mx = x - bnds.left;
             var fx = Math.max(0, Math.min(1, mx/bnds.width));
+            var power = 1024 * (0.5 + Math.abs(fx - 0.5));
             if ( fx < 0.45 ) {
-                throttle_reverse(2*1024*(0.5-fx));
+                throttle_reverse(power);
             }
             else if ( fx > 0.55 ) {
-                throttle_forward(2*1024*(fx-0.5));
+                throttle_forward(power);
             }
             else {
                 throttle_forward(0);
@@ -54,7 +55,7 @@
             var power = this.model.get('power');
             var width = this.throttle_range.attr('width');
             var cx = this.throttle_range.attr('x') + width/2;
-            var normalised = (power/1024) * (width/2);
+            var normalised = (Math.max(0, power - 512)/512) * (width/2);
             if ( forward ) {
                 cx += normalised;
             }
