@@ -4,7 +4,7 @@
 class TrackSensor {
   
   public:
-    explicit TrackSensor(int analogPin, int irLEDPin, int difference=30);
+    explicit TrackSensor(int analogPin, int irLEDPin, int difference=100);
     bool update(void);
     bool isTriggered(void);
   

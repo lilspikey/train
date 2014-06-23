@@ -20,8 +20,8 @@ bool TrackSensor::update(void) {
   digitalWrite(_irLEDPin, LOW);
   delayMicroseconds(500 + random(700));
   int readingOff = analogRead(_analogPin);
-  
-  int difference = readingOff - readingOn;
+
+  int difference = readingOn - readingOff;
   if ( difference > _difference ) {
     if ( _correctCount < CORRECT_THRESHOLD ) {
       _correctCount++;
