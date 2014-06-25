@@ -21,7 +21,7 @@ bool TrackSensor::update(void) {
   delayMicroseconds(500 + random(700));
   int readingOff = analogRead(_analogPin);
 
-  int difference = readingOn - readingOff;
+  int difference = readingOff - readingOn;
   if ( difference > _difference ) {
     if ( _correctCount < CORRECT_THRESHOLD ) {
       _correctCount++;
