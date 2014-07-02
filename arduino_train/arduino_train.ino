@@ -6,8 +6,8 @@
 #include "protocol.h"
 #include "flash_string.h"
 
-#define SENSOR_ON1 2
-#define SENSOR_ON2 3
+#define SENSOR_ON1 3
+#define SENSOR_ON2 2
 
 #define THROTTLE_POWER 9
 #define THROTTLE_FWD 8
