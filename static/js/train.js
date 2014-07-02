@@ -126,7 +126,7 @@
     });
 
     var host = window.location.host;
-    var ws = new WebSocket("ws://"+host+"/ws");
+    var ws = new ReconnectingWebSocket("ws://"+host+"/ws");
     ws.onmessage = function(evt) {
         if ( evt.data ) {
             var json = JSON.parse(evt.data);
