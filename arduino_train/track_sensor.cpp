@@ -16,7 +16,7 @@ bool TrackSensor::update(void) {
   digitalWrite(_irLEDPin, HIGH);
   delayMicroseconds(500 + random(700));
   int readingOn = analogRead(_analogPin);
-
+  
   digitalWrite(_irLEDPin, LOW);
   delayMicroseconds(500 + random(700));
   int readingOff = analogRead(_analogPin);

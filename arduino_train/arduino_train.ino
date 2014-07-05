@@ -6,8 +6,8 @@
 #include "protocol.h"
 #include "flash_string.h"
 
-#define SENSOR_ON1 3
-#define SENSOR_ON2 2
+#define SENSOR_ON1 2
+#define SENSOR_ON2 3
 
 #define THROTTLE_POWER 9
 #define THROTTLE_FWD 8
@@ -77,7 +77,7 @@ void handle_command(protocol_cmd cmd, unsigned int arg) {
 }
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(1200);
   protocol.log(FS("Setup started"));
   Timer1.initialize(1e6/PWM_HZ);
   protocol.set_cmd_handler(handle_command);
