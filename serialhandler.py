@@ -1,5 +1,7 @@
 import struct
 import threading
+import collections
+import time
 
 # use PPP frame format
 FRAME_START_BYTE = 0x7E
@@ -26,6 +28,7 @@ class SerialClosedException(Exception):
 class Frame(object):
     def __init__(self, port):
         self.port = port
+        self._incoming_bytes = collections.deque()
 
     def __enter__(self):
         self.port.write([FRAME_START_BYTE])
@@ -46,9 +49,12 @@ class Frame(object):
     
     def _read(self, stop):
         while True:
-            b = self.port.read()
+            if self._incoming_bytes:
+                return self._incoming_bytes.popleft()
+            num = max(1, self.port.inWaiting())
+            b = self.port.read(size=num)
             if b:
-                return b[0]
+                self._incoming_bytes.extend(b)
             elif stop.is_set():
                 raise SerialClosedException("Serial port closed")
 
@@ -108,6 +114,7 @@ class SerialProtocol(object):
             self.callback(key, value)
 
     def read_frames(self):
+        time.sleep(1)
         print("Reading frames")
         while not self.stop.is_set():
             try:

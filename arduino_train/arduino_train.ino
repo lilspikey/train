@@ -77,7 +77,7 @@ void handle_command(protocol_cmd cmd, unsigned int arg) {
 }
 
 void setup() {
-  Serial.begin(1200);
+  Serial.begin(9600);
   protocol.log(FS("Setup started"));
   Timer1.initialize(1e6/PWM_HZ);
   protocol.set_cmd_handler(handle_command);

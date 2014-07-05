@@ -72,7 +72,7 @@ def configure_app(args, ioloop):
                 print(bytes)
         port = DummyPort()
     else:
-        port = serial.Serial(args.serial_port, baudrate=1200, timeout=0.1)
+        port = serial.Serial(args.serial_port, baudrate=9600, timeout=0.5)
 
     def serial_callback(key, value):
         ioloop.add_callback(status_received, key, value)
