@@ -57,10 +57,8 @@ bool isAcknowledgeLow() {
 }
 
 void flashLED() {
-  digitalWrite(PIN_LED, HIGH);
-  delay(500);
-  digitalWrite(PIN_LED, LOW);
-  delay(500);
+  int period = millis() % 1000;
+  digitalWrite(PIN_LED, period < 500? HIGH : LOW);
 }
 
 void loop() {
