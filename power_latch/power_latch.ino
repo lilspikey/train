@@ -118,6 +118,8 @@ void loop() {
       }
     }
     break;
+    // TODO wait for 20/30 seconds before actually removing power
+    // to give RPi chance to shutdown properly
     case SHUTDOWN: {
       digitalWrite(PIN_LED, LOW);
       digitalWrite(PIN_POWER_ON, LOW);
