@@ -7,6 +7,7 @@ power button pressed and we should shutdown RPi
 
 import RPi.GPIO as GPIO
 import time
+import subprocess
 
 GPIO.setmode(GPIO.BOARD)
 
@@ -21,8 +22,11 @@ try:
     while GPIO.input(SHUTDOWN_REQUEST_PIN) == GPIO.HIGH:
         time.sleep(0.25)
 
-    print("SHUTDOWN")
-    GPIO.output(SHUTDOWN_CONFIRM_PIN, GPIO.LOW)
+    # used for debug purposes
+    #print("SHUTDOWN")
+    #GPIO.output(SHUTDOWN_CONFIRM_PIN, GPIO.LOW)
+
+    subprocess.call('halt', shell=False)
 finally:
     # only cleanup request pin, as we want confirm pin to stay high
     # until RPi has actually shutdown
