@@ -19,13 +19,14 @@ def start(debug=False):
     GPIO.output(SHUTDOWN_CONFIRM_PIN, GPIO.HIGH)
 
     while GPIO.input(SHUTDOWN_REQUEST_PIN) == GPIO.HIGH:
-        time.sleep(0.25)
+        time.sleep(0.1)
     
+    GPIO.output(SHUTDOWN_CONFIRM_PIN, GPIO.LOW)
+    time.sleep(0.2)
     if debug:
         print("SHUTDOWN")
     else:
         subprocess.call('poweroff', shell=False)
-    GPIO.output(SHUTDOWN_CONFIRM_PIN, GPIO.LOW)
 
 
 def main(args):
