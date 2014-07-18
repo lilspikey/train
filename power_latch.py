@@ -25,9 +25,6 @@ def start(debug=False):
         print("SHUTDOWN")
     else:
         subprocess.call('poweroff', shell=False)
-
-
-def stop():
     GPIO.output(SHUTDOWN_CONFIRM_PIN, GPIO.LOW)
 
 
@@ -38,20 +35,14 @@ def main(args):
         GPIO.setup(SHUTDOWN_REQUEST_PIN, GPIO.IN)
         GPIO.setup(SHUTDOWN_CONFIRM_PIN, GPIO.OUT)
         
-        if args.command == 'start':
-            start(args.debug)
-        elif args.command == 'stop':
-            stop()
+        start(args.debug)
 
     finally:
-        # only cleanup request pin, as we want confirm pin to stay high
-        # until RPi has actually shutdown
-        GPIO.cleanup(SHUTDOWN_REQUEST_PIN)
+        GPIO.cleanup()
 
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Deals with power on/off button')
-    parser.add_argument('command', choices=['start', 'stop'])
     parser.add_argument('--debug', action='store_true')
 
     args = parser.parse_args()

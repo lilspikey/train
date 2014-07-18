@@ -1,4 +1,0 @@
-#!/bin/sh
-
-/home/pi/train/venv/bin/python /home/pi/train/power_latch.py stop
-
