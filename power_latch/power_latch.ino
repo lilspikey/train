@@ -80,7 +80,7 @@ void loop() {
       // that button goes up again before we listen out
       // for button press again
       digitalWrite(PIN_POWER_ON, HIGH);
-      digitalWrite(PIN_SHUTDOWN, HIGH);
+      digitalWrite(PIN_SHUTDOWN, LOW);
       if ( isButtonUp() ) {
         // until we get acknowledgement
         // that RPi is up we'll flash LED
