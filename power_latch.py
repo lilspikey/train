@@ -6,7 +6,8 @@ power button pressed and we should shutdown RPi
 '''
 
 import RPi.GPIO as GPIO
-
+import time
+import subprocess
 
 SHUTDOWN_REQUEST_PIN = 16
 SHUTDOWN_CONFIRM_PIN = 18
@@ -20,9 +21,6 @@ def is_shutdown_requested():
 
 
 def start(debug=False):
-    import time
-    import subprocess
-
     # low means we don't want to power down
     GPIO.output(SHUTDOWN_CONFIRM_PIN, GPIO.LOW)
 
