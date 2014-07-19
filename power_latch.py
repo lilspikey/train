@@ -12,19 +12,26 @@ SHUTDOWN_REQUEST_PIN = 16
 SHUTDOWN_CONFIRM_PIN = 18
 
 
+def is_shutdown_requested():
+    if GPIO.input(SHUTDOWN_REQUEST_PIN) == GPIO.HIGH:
+        time.sleep(0.05)
+        return GPIO.input(SHUTDOWN_REQUEST_PIN) == GPIO.HIGH
+    return False
+
+
 def start(debug=False):
     import time
     import subprocess
 
-    GPIO.output(SHUTDOWN_CONFIRM_PIN, GPIO.HIGH)
+    # low means we don't want to power down
+    GPIO.output(SHUTDOWN_CONFIRM_PIN, GPIO.LOW)
 
-    while GPIO.input(SHUTDOWN_REQUEST_PIN) == GPIO.HIGH:
+    while not is_shutdown_requested():
         time.sleep(0.1)
     
-    GPIO.output(SHUTDOWN_CONFIRM_PIN, GPIO.LOW)
-    time.sleep(0.2)
     if debug:
         print("SHUTDOWN")
+        GPIO.setup(SHUTDOWN_CONFIRM_PIN, GPIO.IN)
     else:
         subprocess.call('poweroff', shell=False)
 
@@ -39,7 +46,11 @@ def main(args):
         start(args.debug)
 
     finally:
-        GPIO.cleanup()
+        # just clean this pin, as we'll rely
+        # on confirm pin getting switched to input
+        # when RPi powers down (which should pull
+        # things high on level converter)
+        GPIO.cleanup(SHUTDOWN_REQUEST_PIN)
 
 if __name__ == '__main__':
     import argparse

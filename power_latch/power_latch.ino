@@ -20,15 +20,18 @@ void setup() {
   pinMode(PIN_SHUTDOWN, OUTPUT);
   pinMode(PIN_LED, OUTPUT);
   
+  // pull up on button
   pinMode(PIN_BUTTON, INPUT);
   digitalWrite(PIN_BUTTON, HIGH);
   
-  // we'll add a pull down resistor to this input (e.g. 10K)
-  // we'll also want a pull down on PIN_SHUTDOWN for the RPi
+  // pull up on acknowdlege pin too, though
+  // the level converter between this
+  // and RPi also has a pullup attached to it
   pinMode(PIN_SHUTDOWN_ACKNOWLEDGED, INPUT);
+  digitalWrite(PIN_SHUTDOWN_ACKNOWLEDGED, HIGH);
   
   digitalWrite(PIN_POWER_ON, LOW);
-  digitalWrite(PIN_SHUTDOWN, LOW);
+  digitalWrite(PIN_SHUTDOWN, HIGH);
 }
 
 bool isPinStateMatching(int pin, int state) {
@@ -81,7 +84,7 @@ void loop() {
       if ( isButtonUp() ) {
         // until we get acknowledgement
         // that RPi is up we'll flash LED
-        if ( isAcknowledgeHigh() ) {
+        if ( isAcknowledgeLow() ) {
           state = POWER;
         }
         else {
@@ -109,18 +112,20 @@ void loop() {
     break;
     case SEND_SHUTDOWN: {
       // now wait for RPi to signal it has shutdown
-      digitalWrite(PIN_SHUTDOWN, LOW);
-      if ( isAcknowledgeLow() ) {
+      digitalWrite(PIN_SHUTDOWN, HIGH);
+      if ( isAcknowledgeHigh() ) {
         state = SHUTDOWN;
+        // slight fudge to wait a little bit longer
+        // before actually pulling power
+        delay(1000);
       }
       else {
         flashLED();
       }
     }
     break;
-    // TODO wait for 20/30 seconds before actually removing power
-    // to give RPi chance to shutdown properly
     case SHUTDOWN: {
+      // turn off LED and remove power
       digitalWrite(PIN_LED, LOW);
       digitalWrite(PIN_POWER_ON, LOW);
     }
