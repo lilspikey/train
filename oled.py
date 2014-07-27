@@ -125,7 +125,7 @@ class Adafruit_SSD1306(object):
             self.ssd1306_data(data)
 
     def blit(self, source):
-        '''display a pygame surface on the screen'''
+        '''display a Pillow image to the screen'''
         # TODO can probably be more efficient here,
         # but we're dealign with relatively small number of pixels
         # so may well be ok for display that doesn't update too often
@@ -136,13 +136,13 @@ class Adafruit_SSD1306(object):
                 index = x + yindex
                 bit = (1 << (y&7))
                 # apply basic threshold to source color
+                # TODO check palette?
                 # TODO possibly memoize this conversion?
-                col = source.get_at((x,y))
+                r, g, b = source.getpixel((x,y))
                 black = True
-                if col.a > 200:
-                    avg = (col.r + col.g + col.b)/3
-                    if avg > 200:
-                        black = False
+                avg = (r + g + b)/3
+                if avg > 200:
+                    black = False
                 if black:
                     self.buffer[index] &= ~bit
                 else:

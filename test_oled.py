@@ -4,8 +4,7 @@ from oled import Adafruit_SSD1306
 from i2c import Bus
 from RPi import GPIO
 import time
-import pygame.image
-import pygame.transform
+from PIL import Image
 import sys
 
 
@@ -18,9 +17,10 @@ if __name__ == '__main__':
         screen = Adafruit_SSD1306(bus, address, OLED_RESET)
         
         for name in sys.argv[1:]:
-            surface = pygame.image.load(name)
-            scaled = pygame.transform.smoothscale(surface, (screen.WIDTH, screen.HEIGHT))
-            screen.blit(scaled)
+            image = Image.open(name)
+            image = image.resize((screen.WIDTH, screen.HEIGHT))
+            image = image.convert('RGB')
+            screen.blit(image)
             time.sleep(1)
         
     finally:
