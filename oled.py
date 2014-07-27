@@ -59,7 +59,7 @@ class Adafruit_SSD1306(object):
     def __init__(self, bus, address, reset_pin, vccstate=SSD1306_SWITCHCAPVCC):
         self.bus = bus
         self.address = address
-        self.buffer = array('B', [0 for i in range(self.WIDTH*self.HEIGHT/8)])
+        self.buffer = array('B', [0 for i in range(self.WIDTH*self.HEIGHT//8)])
         
         GPIO.setup(reset_pin, GPIO.OUT)
         GPIO.output(reset_pin, GPIO.HIGH)
@@ -120,7 +120,7 @@ class Adafruit_SSD1306(object):
         self.ssd1306_command(0)
         self.ssd1306_command(7)
 
-        for i in xrange(0, len(self.buffer), 16):
+        for i in range(0, len(self.buffer), 16):
             data = self.buffer[i:i+16]
             self.ssd1306_data(data)
 
@@ -130,9 +130,9 @@ class Adafruit_SSD1306(object):
         # but we're dealign with relatively small number of pixels
         # so may well be ok for display that doesn't update too often
         # TODO check that source and screen match size
-        for y in xrange(0, self.HEIGHT):
-            yindex = (y/8) * self.WIDTH
-            for x in xrange(0, self.WIDTH):
+        for y in range(0, self.HEIGHT):
+            yindex = (y//8) * self.WIDTH
+            for x in range(0, self.WIDTH):
                 index = x + yindex
                 bit = (1 << (y&7))
                 # apply basic threshold to source color
