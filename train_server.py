@@ -8,6 +8,10 @@ import os
 import serialhandler
 import serial
 import json
+from model import TrainSet
+
+
+trainset = TrainSet()
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -19,8 +23,14 @@ active_sockets = set()
 
 
 def status_received(key, value):
+    setattr(trainset, key, value)
+
+
+@trainset.add_listener
+def model_changed(model, name):
+    value = getattr(model, name)
     for sock in active_sockets:
-        sock.send_status(key, value)
+        sock.send_status(name, value)
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
@@ -30,6 +40,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         print("WebSocket opened")
         active_sockets.add(self)
+        for name in trainset.status_attrs():
+            self.send_status(name, getattr(trainset, name))
     
     def send_status(self, key, value):
         message = {'status': {key: value}}
@@ -64,12 +76,14 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 def configure_app(args, ioloop):
     if args.serial_port == 'dummy':
         class DummyPort(object):
-            def read(self):
+            def read(self, size=None):
                 from time import sleep
                 sleep(0.1)
                 return 0
+            def inWaiting(self):
+                return 0
             def write(self, bytes):
-                print(bytes)
+                print('Write bytes:', bytes)
         port = DummyPort()
     else:
         port = serial.Serial(args.serial_port, baudrate=9600, timeout=0.5)
