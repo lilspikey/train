@@ -4,6 +4,7 @@ from oled import Adafruit_SSD1306
 from i2c import Bus
 from RPi import GPIO
 from PIL import Image, ImageDraw, ImageFont
+import time
 
 
 def get_network_info():
@@ -14,14 +15,16 @@ def get_network_info():
 
 
 def update_screen(screen):
-    image = Image.new('RGB', (screen.WIDTH, screen.HEIGHT))
-    d = ImageDraw.Draw(image)
-    font = ImageFont.load_default()
-    hostname, ip = get_network_info()
-    d.text((0,0), hostname, font=font)
-    _, ipheight = font.getsize(ip)
-    d.text((0, screen.HEIGHT-ipheight), ip, font=font)
-    screen.blit(image)
+    while True:
+        image = Image.new('RGB', (screen.WIDTH, screen.HEIGHT))
+        d = ImageDraw.Draw(image)
+        font = ImageFont.load_default()
+        hostname, ip = get_network_info()
+        d.text((0,0), hostname, font=font)
+        _, ipheight = font.getsize(ip)
+        d.text((0, screen.HEIGHT-ipheight), ip, font=font)
+        screen.blit(image)
+        time.sleep(30)
 
 
 def main():
