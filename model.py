@@ -30,7 +30,7 @@ class Model:
         return self._old[name]
 
     def _notify_listeners(self, changed_attr):
-        for listener in listeners:
+        for listener in self._listeners:
             listener(self, changed_attr)
 
 
@@ -47,7 +47,7 @@ class TrainSet(Model):
     sensor6 = Attr('sensor6', False)
 
     def status_attrs(self):
-        return ['power', 'forward', 'decoupler', 'sensor1', 'sensor2', 'sensor3', 'sensor4', 'sensor5', 'sensor6']
+        return ['power', 'forward', 'turnout', 'decoupler', 'sensor1', 'sensor2', 'sensor3', 'sensor4', 'sensor5', 'sensor6']
 
 
     
