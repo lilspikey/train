@@ -26,8 +26,9 @@
             }
         },
         handleThrottle: function(event) {
+            var x = event.clientX;
             var bnds = this.throttle_range[0].getBoundingClientRect();
-            var mx = event.x - bnds.left;
+            var mx = x - bnds.left;
             var fx = Math.max(0, Math.min(1, mx/bnds.width));
             if ( fx < 0.45 ) {
                 throttle_reverse(2*1024*(0.5-fx));
