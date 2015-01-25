@@ -9,7 +9,8 @@
 #define SENSOR_ON1 2
 #define SENSOR_ON2 3
 
-#define THROTTLE_POWER 9
+#define THROTTLE_POWER 10
+#define THROTTLE_ENABLE 9
 #define THROTTLE_FWD 8
 #define THROTTLE_BCK 7
 
@@ -18,10 +19,10 @@
 
 #define DECOUPLER 4
 
-#define PWM_HZ 1024
-//#define PWM_HZ 60
+//#define PWM_HZ 1024
+#define PWM_HZ 60
 
-Throttle throttle(THROTTLE_POWER, THROTTLE_FWD, THROTTLE_BCK);
+Throttle throttle(THROTTLE_POWER, THROTTLE_ENABLE, THROTTLE_FWD, THROTTLE_BCK);
 Solenoid turnoutLeft(TURNOUT_LEFT);
 Solenoid turnoutRight(TURNOUT_RIGHT);
 Turnout turnout(turnoutLeft, turnoutRight);

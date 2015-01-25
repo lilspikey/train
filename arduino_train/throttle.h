@@ -14,7 +14,7 @@ typedef enum {
 class Throttle {
   
   public:
-    explicit Throttle(int powerPin, int forwardPin, int backwardPin);
+    explicit Throttle(int powerPin, int enablePin, int forwardPin, int backwardPin);
     int getPower();
     void setPower(int power);
     bool isForward();
@@ -27,6 +27,7 @@ class Throttle {
   
     throttle_state _state;
     int _powerPin;
+    int _enablePin;
     int _forwardPin;
     int _backwardPin;
     bool _forward;

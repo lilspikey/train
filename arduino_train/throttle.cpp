@@ -3,9 +3,10 @@
 #include "throttle.h"
 
 
-Throttle::Throttle(int powerPin, int forwardPin, int backwardPin)
+Throttle::Throttle(int powerPin, int enablePin, int forwardPin, int backwardPin)
  : _state(THROTTLE_STOPPED),
    _powerPin(powerPin),
+   _enablePin(enablePin),
    _forwardPin(forwardPin),
    _backwardPin(backwardPin),
    _forward(true),
@@ -45,6 +46,7 @@ bool Throttle::updatePower(int targetPower) {
   _power += (_power < targetPower)? accel : -accel;
   if ( _power != prevPower ) {
     Timer1.pwm(_powerPin, _power);
+    digitalWrite(_enablePin, _power > 0? HIGH : LOW);
     return true;
   }
   return false;
