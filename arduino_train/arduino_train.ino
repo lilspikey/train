@@ -19,8 +19,7 @@
 
 #define DECOUPLER 4
 
-//#define PWM_HZ 1024
-#define PWM_HZ 60
+#define PWM_HZ 20000
 
 Throttle throttle(THROTTLE_POWER, THROTTLE_ENABLE, THROTTLE_FWD, THROTTLE_BCK);
 Solenoid turnoutLeft(TURNOUT_LEFT);
