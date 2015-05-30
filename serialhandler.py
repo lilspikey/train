@@ -18,7 +18,10 @@ PROTOCOL_CMD_TURNOUT_LEFT = 5
 PROTOCOL_CMD_TURNOUT_RIGHT = 6
 PROTOCOL_CMD_DECOUPLER_UP = 7
 PROTOCOL_CMD_DECOUPLER_DOWN = 8
-
+PROTOCOL_CMD_LIGHT1_ON = 9,
+PROTOCOL_CMD_LIGHT1_OFF = 10,
+PROTOCOL_CMD_LIGHT2_ON = 11,
+PROTOCOL_CMD_LIGHT2_OFF = 12
 
 
 class SerialClosedException(Exception):
@@ -146,4 +149,16 @@ class SerialProtocol(object):
 
     def decoupler_down(self):
         self.cmd(PROTOCOL_CMD_DECOUPLER_DOWN, 0)
+
+    def light1_on(self):
+        self.cmd(PROTOCOL_CMD_LIGHT1_ON, 0)
+
+    def light1_off(self):
+        self.cmd(PROTOCOL_CMD_LIGHT1_OFF, 0)
+    
+    def light2_on(self):
+        self.cmd(PROTOCOL_CMD_LIGHT2_ON, 0)
+
+    def light2_off(self):
+        self.cmd(PROTOCOL_CMD_LIGHT2_OFF, 0)
 

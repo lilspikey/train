@@ -67,6 +67,18 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                 self.serial_protocol.decoupler_up()
             else:
                 self.serial_protocol.decoupler_down()
+        elif 'light1' in message:
+            light1 = message['light1']
+            if light1 == 'on':
+                self.serial_protocol.light1_on()
+            else:
+                self.serial_protocol.light1_off()
+        elif 'light2' in message:
+            light2 = message['light2']
+            if light2 == 'on':
+                self.serial_protocol.light2_on()
+            else:
+                self.serial_protocol.light2_off()
 
     def on_close(self):
         print("WebSocket closed")

@@ -3,11 +3,15 @@
 #include "throttle.h"
 #include "solenoid.h"
 #include "turnout.h"
+#include "light.h"
 #include "protocol.h"
 #include "flash_string.h"
 
 #define SENSOR_ON1 2
 #define SENSOR_ON2 3
+
+#define LIGHT1 11
+#define LIGHT2 12
 
 #define THROTTLE_POWER 10
 #define THROTTLE_ENABLE 9
@@ -35,6 +39,9 @@ TrackSensor sensor3(2, SENSOR_ON1);
 TrackSensor sensor4(3, SENSOR_ON2);
 TrackSensor sensor5(4, SENSOR_ON1);
 TrackSensor sensor6(5, SENSOR_ON2);
+
+Light light1(LIGHT1);
+Light light2(LIGHT2);
 
 Protocol protocol(Serial);
 
@@ -73,6 +80,22 @@ void handle_command(protocol_cmd cmd, unsigned int arg) {
       decoupler.deactivate();
     }
     break;
+    case PROTOCOL_CMD_LIGHT1_ON: {
+      light1.on();
+    }
+    break;
+    case PROTOCOL_CMD_LIGHT1_OFF: {
+      light1.off();
+    }
+    break;
+    case PROTOCOL_CMD_LIGHT2_ON: {
+      light2.on();
+    }
+    break;
+    case PROTOCOL_CMD_LIGHT2_OFF: {
+      light2.off();
+    }
+    break;
   }
 }
 
@@ -91,6 +114,12 @@ void checkSensor(TrackSensor& sensor, const FlashString& name) {
   }
 }
 
+void checkLight(Light& light, const FlashString& name) {
+  if ( light.update() ) {
+    protocol.status(name, light.isOn());  
+  }
+}
+
 void loop() {
   for ( int i = 0; i < 16 && Serial.available() > 0; i++ ) {
     protocol.receive();
@@ -105,6 +134,9 @@ void loop() {
   if ( decoupler.update() ) {
     protocol.status(FS("decoupler"), decoupler.isActive());
   }
+  checkLight(light1, FS("light1"));
+  checkLight(light2, FS("light2"));
+  
   checkSensor(sensor1, FS("sensor1"));
   checkSensor(sensor2, FS("sensor2"));
   checkSensor(sensor3, FS("sensor3"));
