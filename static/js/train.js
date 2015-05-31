@@ -122,7 +122,13 @@
     var LightView = Backbone.View.extend({
         initialize: function(options) {
             this.name = options.name;
+            this.light_callback = options.light_callback;
             this.listenTo(this.model, "change:" + this.name, this.update);
+            this.el.click(_.bind(this.onClick, this));
+        },
+        onClick: function() {
+            var on = this.model.get(this.name);
+            this.light_callback(!on);
         },
         update: function() {
             var on = this.model.get(this.name);
@@ -292,7 +298,7 @@
         var sensor_view = new SensorView({model: status, el: elements.sensors[i], name: name});
     }
 
-    var light1_view = new LightView({model: status, el: elements.light1, name: 'light1'});
-    var light2_view = new LightView({model: status, el: elements.light2, name: 'light2'});
+    var light1_view = new LightView({model: status, el: elements.light1, name: 'light1', light_callback: light1});
+    var light2_view = new LightView({model: status, el: elements.light2, name: 'light2', light_callback: light2});
    
 })();
