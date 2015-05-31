@@ -21,7 +21,7 @@ bool Light::isOn() {
 bool Light::update() {
   if ( _on != _prevOn ) {
     digitalWrite(_pin, _on? HIGH : LOW);
-    _on = _prevOn;
+    _prevOn = _on;
     return true;
   }
   return false;

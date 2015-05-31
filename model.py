@@ -45,9 +45,13 @@ class TrainSet(Model):
     sensor4 = Attr('sensor4', False)
     sensor5 = Attr('sensor5', False)
     sensor6 = Attr('sensor6', False)
+    light1 = Attr('light1', False)
+    light2 = Attr('light2', False)
 
     def status_attrs(self):
-        return ['power', 'forward', 'turnout', 'decoupler', 'sensor1', 'sensor2', 'sensor3', 'sensor4', 'sensor5', 'sensor6']
+        return ['power', 'forward', 'turnout', 'decoupler',
+                'sensor1', 'sensor2', 'sensor3', 'sensor4', 'sensor5', 'sensor6',
+                'light1', 'light2']
 
 
     

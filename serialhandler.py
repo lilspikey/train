@@ -112,12 +112,12 @@ class SerialProtocol(object):
                 value = 'left' if value else 'right';
             elif key == 'decoupler':
                 value = 'up' if value else 'down';
-            elif key.startswith('sensor'):
+            elif key.startswith('sensor') or key.startswith('light'):
                 value = True if value else False
             self.callback(key, value)
 
     def read_frames(self):
-        time.sleep(1)
+        time.sleep(1.5)
         print("Reading frames")
         while not self.stop.is_set():
             try:
