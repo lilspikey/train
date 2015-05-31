@@ -119,11 +119,29 @@
         }
     });
 
+    var LightView = Backbone.View.extend({
+        initialize: function(options) {
+            this.name = options.name;
+            this.listenTo(this.model, "change:" + this.name, this.update);
+        },
+        update: function() {
+            var on = this.model.get(this.name);
+            if ( on ) {
+                this.el.animate({"fill": "#ffd"}, 50, ">");
+            }
+            else {
+                this.el.animate({"fill": "#333"}, 50, ">");
+            }
+        }
+    });
+
     var status = new Status({
         forward: true,
         power: 0,
         decoupler: '',
-        turnout: ''
+        turnout: '',
+        light1: false,
+        light2: false
     });
 
     var host = window.location.host;
@@ -150,6 +168,12 @@
     };
     var decoupler = function(direction) {
         ws.send('{ "decoupler": "' + direction + '" }');
+    };
+    var light1 = function(on) {
+        ws.send('{ "light1": "' + (on? 'on' : 'off') + '" }');
+    };
+    var light2 = function(on) {
+        ws.send('{ "light2": "' + (on? 'on' : 'off') + '" }');
     };
     
     var view_port = { width: 640, height: 480 };
@@ -206,6 +230,24 @@
             height: 100,
             r: 5,
             fill: "#33f"
+        },
+        {
+            type: 'rect',
+            x: 0,
+            y: 405,
+            width: 100,
+            height: 50,
+            r: 5,
+            fill: "#333"
+        },
+        {
+            type: 'rect',
+            x: 160,
+            y: 405,
+            width: 100,
+            height: 50,
+            r: 5,
+            fill: "#333"
         }
     ]);
     var sensors = [];
@@ -216,7 +258,7 @@
         sensors.push({
             type: 'rect',
             x: x,
-            y: 350,
+            y: 330,
             width: 50,
             height: 50,
             r: 5,
@@ -231,6 +273,8 @@
         turnout_left: elements[2],
         turnout_right: elements[3],
         decoupler: elements[4],
+        light1: elements[5],
+        light2: elements[6],
         sensors: sensors
     };
 
@@ -247,5 +291,8 @@
         status.set(name, false);
         var sensor_view = new SensorView({model: status, el: elements.sensors[i], name: name});
     }
+
+    var light1_view = new LightView({model: status, el: elements.light1, name: 'light1'});
+    var light2_view = new LightView({model: status, el: elements.light2, name: 'light2'});
    
 })();
