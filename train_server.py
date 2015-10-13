@@ -8,7 +8,7 @@ import os
 import serialhandler
 import serial
 import json
-from model import TrainSet
+from model import TrainSet, AutoPilot
 
 
 trainset = TrainSet()
@@ -34,7 +34,8 @@ def model_changed(model, name):
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
-    def initialize(self, serial_protocol):
+    def initialize(self, autopilot, serial_protocol):
+        self.autopilot = autopilot
         self.serial_protocol = serial_protocol
 
     def open(self):
@@ -65,8 +66,10 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             decoupler = message['decoupler']
             if decoupler == 'up':
                 self.serial_protocol.decoupler_up()
-            else:
+            elif decoupler == 'down':
                 self.serial_protocol.decoupler_down()
+            elif decoupler == 'auto':
+                self.autopilot.auto_decouple()
         elif 'light1' in message:
             light1 = message['light1']
             if light1 == 'on':
@@ -104,9 +107,10 @@ def configure_app(args, ioloop):
         ioloop.add_callback(status_received, key, value)
 
     serial_protocol = serialhandler.SerialProtocol(port, serial_callback)
+    autopilot = AutoPilot(trainset, serial_protocol)
     application = tornado.web.Application([
         (r"/", MainHandler),
-        (r"/ws", WebSocketHandler, { 'serial_protocol': serial_protocol }),
+        (r"/ws", WebSocketHandler, { 'autopilot': autopilot, 'serial_protocol': serial_protocol }),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": args.static_path}),
     ], debug=True, template_path=args.template_path)
     return application

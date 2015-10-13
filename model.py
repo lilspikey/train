@@ -54,4 +54,26 @@ class TrainSet(Model):
                 'light1', 'light2']
 
 
+class AutoPilot(Model):
+    IDLE = 'idle'
+    DECOUPLING = 'decoupling'
+    state = Attr('state', IDLE)
+
+    def __init__(self, trainset, serial_protocol):
+        super(AutoPilot, self).__init__()
+        self._trainset = trainset
+        self._serial_protocol = serial_protocol
+        trainset.add_listener(self._trainset)
     
+    def can_auto_decouple(self):
+        return self._trainset.sensor1 and self._trainset.sensor2
+
+    def auto_decouple(self):
+        if self.state == self.IDLE:
+            self.state = self.DECOUPLING
+
+    def _trainset_changed(self, model, name):
+        print(name)
+
+
+
