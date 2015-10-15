@@ -5,13 +5,11 @@ import tornado.web
 import tornado.websocket
 import argparse
 import os
-import serialhandler
 import serial
 import json
 from model import TrainSet, AutoPilot
 
 
-trainset = TrainSet()
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -22,27 +20,17 @@ class MainHandler(tornado.web.RequestHandler):
 active_sockets = set()
 
 
-def status_received(key, value):
-    setattr(trainset, key, value)
-
-
-@trainset.add_listener
-def model_changed(model, name):
-    value = getattr(model, name)
-    for sock in active_sockets:
-        sock.send_status(name, value)
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
-    def initialize(self, autopilot, serial_protocol):
-        self.autopilot = autopilot
-        self.serial_protocol = serial_protocol
+    def initialize(self, trainset):
+        self.trainset = trainset
 
     def open(self):
         print("WebSocket opened")
         active_sockets.add(self)
-        for name in trainset.status_attrs():
-            self.send_status(name, getattr(trainset, name))
+        for name in self.trainset.status_attrs():
+            self.send_status(name, getattr(self.trainset, name))
     
     def send_status(self, key, value):
         message = {'status': {key: value}}
@@ -52,36 +40,36 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         message = json.loads(message)
         if 'forward' in message:
             power = message['forward']
-            self.serial_protocol.throttle_forward(power)
+            self.trainset.throttle_forward(power)
         elif 'reverse' in message:
             power = message['reverse']
-            self.serial_protocol.throttle_reverse(power)
+            self.trainset.throttle_reverse(power)
         elif 'turnout' in message:
             turnout = message['turnout']
             if turnout == 'left':
-                self.serial_protocol.turnout_left()
+                self.trainset.turnout_left()
             else:
-                self.serial_protocol.turnout_right()
+                self.trainset.turnout_right()
         elif 'decoupler' in message:
             decoupler = message['decoupler']
             if decoupler == 'up':
-                self.serial_protocol.decoupler_up()
+                self.trainset.decoupler_up()
             elif decoupler == 'down':
-                self.serial_protocol.decoupler_down()
+                self.trainset.decoupler_down()
             elif decoupler == 'auto':
-                self.autopilot.auto_decouple()
+                self.trainset.auto_decouple()
         elif 'light1' in message:
             light1 = message['light1']
             if light1 == 'on':
-                self.serial_protocol.light1_on()
+                self.trainset.light1_on()
             else:
-                self.serial_protocol.light1_off()
+                self.trainset.light1_off()
         elif 'light2' in message:
             light2 = message['light2']
             if light2 == 'on':
-                self.serial_protocol.light2_on()
+                self.trainset.light2_on()
             else:
-                self.serial_protocol.light2_off()
+                self.trainset.light2_off()
 
     def on_close(self):
         print("WebSocket closed")
@@ -103,14 +91,17 @@ def configure_app(args, ioloop):
     else:
         port = serial.Serial(args.serial_port, baudrate=9600, timeout=0.5)
 
-    def serial_callback(key, value):
-        ioloop.add_callback(status_received, key, value)
+    trainset = TrainSet(port, ioloop)
+    
+    @trainset.add_listener
+    def model_changed(model, name):
+        value = getattr(model, name)
+        for sock in active_sockets:
+            sock.send_status(name, value)
 
-    serial_protocol = serialhandler.SerialProtocol(port, serial_callback)
-    autopilot = AutoPilot(trainset, serial_protocol)
     application = tornado.web.Application([
         (r"/", MainHandler),
-        (r"/ws", WebSocketHandler, { 'autopilot': autopilot, 'serial_protocol': serial_protocol }),
+        (r"/ws", WebSocketHandler, { 'trainset': trainset }),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": args.static_path}),
     ], debug=True, template_path=args.template_path)
     return application
