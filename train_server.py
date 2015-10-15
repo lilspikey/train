@@ -7,9 +7,7 @@ import argparse
 import os
 import serial
 import json
-from model import TrainSet, AutoPilot
-
-
+from model import TrainSet 
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -20,8 +18,6 @@ class MainHandler(tornado.web.RequestHandler):
 active_sockets = set()
 
 
-
-
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def initialize(self, trainset):
         self.trainset = trainset
@@ -29,7 +25,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         print("WebSocket opened")
         active_sockets.add(self)
-        for name in self.trainset.status_attrs():
+        for name in self.trainset.status_attrs:
             self.send_status(name, getattr(self.trainset, name))
     
     def send_status(self, key, value):

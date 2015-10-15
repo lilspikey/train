@@ -2,22 +2,32 @@ import serialhandler
 
 
 class Attr:
-    def __init__(self, name, default=None):
-        self._name = name
+    def __init__(self, default=None):
+        self.name = None
         self._default = default
 
     def __get__(self, instance, owner):
-        return instance._attribs.get(self._name, self._default)
+        return instance._attribs.get(self.name, self._default)
 
     def __set__(self, instance, value):
-        old_value = instance._attribs.get(self._name, self._default)
+        old_value = instance._attribs.get(self.name, self._default)
         if old_value != value:
-            instance._old[self._name] = old_value
-            instance._attribs[self._name] = value
-            instance._notify_listeners(self._name)
+            instance._old[self.name] = old_value
+            instance._attribs[self.name] = value
+            instance._notify_listeners(self.name)
 
 
-class Model:
+class ModelMeta(type):
+    def __init__(cls, name, bases, namespace):
+        super(ModelMeta, cls).__init__(name, bases, namespace)
+        cls.status_attrs = []
+        for name, value in namespace.items():
+            if isinstance(value, Attr):
+                value.name = name
+                cls.status_attrs.append(name)
+
+
+class Model(metaclass=ModelMeta):
     def __init__(self):
         self._attribs = {}
         self._old = {}
@@ -29,25 +39,29 @@ class Model:
 
     def get_old_value(self, name):
         return self._old[name]
-
+    
     def _notify_listeners(self, changed_attr):
         for listener in self._listeners:
             listener(self, changed_attr)
 
 
 class TrainSet(Model):
-    power = Attr('power', 0)
-    forward = Attr('forward', True)
-    turnout = Attr('turnout', 'left')
-    decoupler = Attr('decoupler', 'down')
-    sensor1 = Attr('sensor1', False)
-    sensor2 = Attr('sensor2', False)
-    sensor3 = Attr('sensor3', False)
-    sensor4 = Attr('sensor4', False)
-    sensor5 = Attr('sensor5', False)
-    sensor6 = Attr('sensor6', False)
-    light1 = Attr('light1', False)
-    light2 = Attr('light2', False)
+    AUTO_STATE_IDLE = 'idle'
+    AUTO_STATE_DECOUPLING = 'decoupling'
+    auto_state = Attr(AUTO_STATE_IDLE)
+
+    power = Attr(0)
+    forward = Attr(True)
+    turnout = Attr('left')
+    decoupler = Attr('down')
+    sensor1 = Attr(False)
+    sensor2 = Attr(False)
+    sensor3 = Attr(False)
+    sensor4 = Attr(False)
+    sensor5 = Attr(False)
+    sensor6 = Attr(False)
+    light1 = Attr(False)
+    light2 = Attr(False)
 
     def __init__(self, port, ioloop):
         super(TrainSet, self).__init__()
@@ -57,11 +71,6 @@ class TrainSet(Model):
     
     def _status_received(self, key, value):
         setattr(self, key, value)
-
-    def status_attrs(self):
-        return ['power', 'forward', 'turnout', 'decoupler',
-                'sensor1', 'sensor2', 'sensor3', 'sensor4', 'sensor5', 'sensor6',
-                'light1', 'light2']
 
     def throttle_forward(self, power):
         self.serial_protocol.throttle_forward(power)
@@ -93,34 +102,15 @@ class TrainSet(Model):
     def light2_off(self):
         self.serial_protocol.light2_off()
 
-
-class AutoPilot(Model):
-    IDLE = 'idle'
-    DECOUPLING = 'decoupling'
-    state = Attr('state', IDLE)
-
-    def __init__(self, trainset, serial_protocol):
-        super(AutoPilot, self).__init__()
-        self._trainset = trainset
-        self._serial_protocol = serial_protocol
-        trainset.add_listener(self._trainset)
-    
     def can_auto_decouple(self):
-        if self.state != self.IDLE:
+        if self.auto_state != self.AUTO_STATE_IDLE:
             return False
         # TODO need right sensors here
-        return self._trainset.sensor1 and self._trainset.sensor2
+        return self.sensor1 and self.sensor2
 
     def auto_decouple(self):
         if self.can_auto_decouple():
-            self.state = self.DECOUPLING
-            self._serial_protocol.throttle_forward(900)
-
-    def _trainset_changed(self, model, name):
-        if self.state == self.DECOUPLING:
-            # TODO need right sensors here
-            if self._trainset.sensor3:
-                self._serial_protocol.decoupler_up()
-
-
+            self.auto_state = self.AUTO_STATE_DECOUPLING
+            self.throttle_forward(900)
+            self.decoupler_up()
 
