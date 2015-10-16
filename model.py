@@ -2,9 +2,10 @@ import serialhandler
 
 
 class Attr:
-    def __init__(self, default=None):
+    def __init__(self, default=None, alias=None):
         self.name = None
         self._default = default
+        self.alias = alias
 
     def __get__(self, instance, owner):
         return instance._attribs.get(self.name, self._default)
@@ -25,6 +26,8 @@ class ModelMeta(type):
             if isinstance(value, Attr):
                 value.name = name
                 cls.status_attrs.append(name)
+                if value.alias:
+                    setattr(cls, value.alias, value)
 
 
 class Model(metaclass=ModelMeta):
@@ -54,9 +57,9 @@ class TrainSet(Model):
     forward = Attr(True)
     turnout = Attr('left')
     decoupler = Attr('down')
-    sensor1 = Attr(False)
-    sensor2 = Attr(False)
-    sensor3 = Attr(False)
+    sensor1 = Attr(False, alias='sensor_buffer')
+    sensor2 = Attr(False, alias='sensor_predecoupler')
+    sensor3 = Attr(False, alias='sensor_postdecoupler')
     sensor4 = Attr(False)
     sensor5 = Attr(False)
     sensor6 = Attr(False)
@@ -68,6 +71,11 @@ class TrainSet(Model):
         def serial_callback(key, value):
             ioloop.add_callback(self._status_received, key, value)
         self.serial_protocol = serialhandler.SerialProtocol(port, serial_callback)
+        self.ioloop = ioloop
+        @self.add_listener
+        def _update_autopilot(model, name):
+            if name.startswith('sensor'):
+                self.update_autopilot()
     
     def _status_received(self, key, value):
         setattr(self, key, value)
@@ -102,15 +110,24 @@ class TrainSet(Model):
     def light2_off(self):
         self.serial_protocol.light2_off()
 
+    def update_autopilot(self):
+        if self.auto_state == self.AUTO_STATE_DECOUPLING:
+            self.throttle_forward(900)
+            if self.sensor_postdecoupler:
+                if self.decoupler == 'down':
+                    self.decoupler_up()
+                    self.auto_state = self.AUTO_STATE_IDLE
+
     def can_auto_decouple(self):
         if self.auto_state != self.AUTO_STATE_IDLE:
             return False
-        # TODO need right sensors here
-        return self.sensor1 and self.sensor2
-
+        return self.sensor_buffer and self.sensor_predecoupler
+    
     def auto_decouple(self):
         if self.can_auto_decouple():
             self.auto_state = self.AUTO_STATE_DECOUPLING
-            self.throttle_forward(900)
-            self.decoupler_up()
+            self.update_autopilot()
+            def _reset_autopilot():
+                self.auto_state = self.AUTO_STATE_IDLE
+            self.ioloop.add_timeout(self.ioloop.time()+3, _reset_autopilot)
 
