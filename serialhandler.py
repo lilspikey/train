@@ -108,6 +108,7 @@ class SerialProtocol(object):
         elif cmd == PROTOCOL_CMD_STATUS:
             key, remaining = self._read_string(data)
             value, _ = self._read_int(remaining)
+            print("key", key)
             if key == 'turnout':
                 value = 'left' if value else 'right';
             elif key == 'decoupler':
@@ -161,4 +162,89 @@ class SerialProtocol(object):
 
     def light2_off(self):
         self.cmd(PROTOCOL_CMD_LIGHT2_OFF, 0)
+
+
+class DummyPort(object):
+    '''
+       This is used to provide a surrogate for the real serial port
+       and arduino, when they aren't connected
+    '''
+    def __init__(self):
+        class InternalPort(object):
+            def __init__(self):
+                self._bytes_in = []
+                self._bytes_out = []
+
+            def inWaiting(self):
+                if self._bytes_in:
+                    return len(self._bytes_in[0])
+                return 0
+
+            def read(self, size=None):
+                if self._bytes_in:
+                    return self._bytes_in.pop(0)
+                from time import sleep
+                sleep(0.1)
+                return None
+
+            def write(self, bytes):
+                self._bytes_out.append(bytes)
+
+        self._int_port = InternalPort()
+        self.stop = threading.Event()
+        self.frame = Frame(self._int_port)
+        reader = threading.Thread(target=self.read_frames)
+        reader.daemon = True
+        reader.start()
+
+    def read(self, size=None):
+        if self._int_port._bytes_out:
+            return self._int_port._bytes_out.pop(0)
+        else:
+            from time import sleep
+            sleep(0.1)    
+            return None
+    
+    def inWaiting(self):
+        if self._int_port._bytes_out:
+            return len(self._int_port._bytes_out[0])
+        return 0
+    
+    def write_status(self, key, value):
+        with self.frame as frame:
+            key = key.encode('ascii')
+            frame.write(struct.pack('>BB', PROTOCOL_CMD_STATUS, len(key)))
+            frame.write(key)
+            frame.write(value)
+
+    def decode_frame(self, frame):
+        print(frame)
+        cmd, data = frame[0], frame[1:]
+        print(cmd, data)
+        if cmd == PROTOCOL_CMD_THROTTLE_FWD:
+            self.write_status('forward', struct.pack('>H', 1))
+            self.write_status('power', data)
+        elif cmd == PROTOCOL_CMD_THROTTLE_REV:
+            self.write_status('forward', struct.pack('>H', 0))
+            self.write_status('power', data)
+        elif cmd == PROTOCOL_CMD_TURNOUT_LEFT:
+            self.write_status('turnout', struct.pack('>H', 1))
+        elif cmd == PROTOCOL_CMD_TURNOUT_RIGHT:
+            self.write_status('turnout', struct.pack('>H', 0))
+        elif cmd == PROTOCOL_CMD_DECOUPLER_UP:
+            self.write_status('decoupler', struct.pack('>H', 1))
+        elif cmd == PROTOCOL_CMD_DECOUPLER_DOWN:
+            self.write_status('decoupler', struct.pack('>H', 0))
+
+    def read_frames(self):
+         while not self.stop.is_set():
+            try:
+                frame = self.frame.read_frame(self.stop)
+                self.decode_frame(frame)
+            except SerialClosedException:
+                pass
+
+    def write(self, bytes):
+        print('Write bytes:', bytes)
+        self._int_port._bytes_in.append(bytes)
 

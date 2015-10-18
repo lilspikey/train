@@ -74,15 +74,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
 def configure_app(args, ioloop):
     if args.serial_port == 'dummy':
-        class DummyPort(object):
-            def read(self, size=None):
-                from time import sleep
-                sleep(0.1)
-                return 0
-            def inWaiting(self):
-                return 0
-            def write(self, bytes):
-                print('Write bytes:', bytes)
+        from serialhandler import DummyPort
         port = DummyPort()
     else:
         port = serial.Serial(args.serial_port, baudrate=9600, timeout=0.5)
