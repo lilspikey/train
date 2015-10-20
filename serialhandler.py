@@ -108,7 +108,6 @@ class SerialProtocol(object):
         elif cmd == PROTOCOL_CMD_STATUS:
             key, remaining = self._read_string(data)
             value, _ = self._read_int(remaining)
-            print("key", key)
             if key == 'turnout':
                 value = 'left' if value else 'right';
             elif key == 'decoupler':
@@ -119,7 +118,6 @@ class SerialProtocol(object):
 
     def read_frames(self):
         time.sleep(1.5)
-        print("Reading frames")
         while not self.stop.is_set():
             try:
                 frame = self.frame.read_frame(self.stop)
@@ -193,9 +191,23 @@ class DummyPort(object):
         self._int_port = InternalPort()
         self.stop = threading.Event()
         self.frame = Frame(self._int_port)
+        self._frame_lock = threading.RLock()
         reader = threading.Thread(target=self.read_frames)
         reader.daemon = True
         reader.start()
+        input = threading.Thread(target=self.read_input)
+        input.daemon = True
+        input.start()
+    
+    def read_input(self):
+        print("Commands:")
+        print(" decouple-test")
+        while True:
+            text = input()
+            text = text.strip()
+            if text == 'decouple-test':
+                self.write_status('sensor1', struct.pack('>H', 1))
+                self.write_status('sensor2', struct.pack('>H', 1))
 
     def read(self, size=None):
         if self._int_port._bytes_out:
@@ -211,16 +223,15 @@ class DummyPort(object):
         return 0
     
     def write_status(self, key, value):
-        with self.frame as frame:
-            key = key.encode('ascii')
-            frame.write(struct.pack('>BB', PROTOCOL_CMD_STATUS, len(key)))
-            frame.write(key)
-            frame.write(value)
+        with self._frame_lock:
+            with self.frame as frame:
+                key = key.encode('ascii')
+                frame.write(struct.pack('>BB', PROTOCOL_CMD_STATUS, len(key)))
+                frame.write(key)
+                frame.write(value)
 
     def decode_frame(self, frame):
-        print(frame)
         cmd, data = frame[0], frame[1:]
-        print(cmd, data)
         if cmd == PROTOCOL_CMD_THROTTLE_FWD:
             self.write_status('forward', struct.pack('>H', 1))
             self.write_status('power', data)
@@ -245,6 +256,5 @@ class DummyPort(object):
                 pass
 
     def write(self, bytes):
-        print('Write bytes:', bytes)
         self._int_port._bytes_in.append(bytes)
 

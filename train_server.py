@@ -23,7 +23,6 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.trainset = trainset
 
     def open(self):
-        print("WebSocket opened")
         active_sockets.add(self)
         for name in self.trainset.status_attrs:
             self.send_status(name, getattr(self.trainset, name))
@@ -68,7 +67,6 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                 self.trainset.light2_off()
 
     def on_close(self):
-        print("WebSocket closed")
         active_sockets.remove(self)
 
 
