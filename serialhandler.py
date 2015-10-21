@@ -206,8 +206,19 @@ class DummyPort(object):
             text = input()
             text = text.strip()
             if text == 'decouple-test':
-                self.write_status('sensor1', struct.pack('>H', 1))
-                self.write_status('sensor2', struct.pack('>H', 1))
+                self.write_status_int('sensor1', 1)
+                self.write_status_int('sensor2', 1)
+                from time import sleep
+                sleep(3)
+                self.write_status_int('sensor1', 0)
+                self.write_status_int('sensor3', 1)
+                sleep(3)
+                self.write_status_int('sensor2', 0)
+                self.write_status_int('sensor3', 0)
+                self.write_status_int('decoupler', 0)
+    
+    def write_status_int(self, sensor, value):
+        self.write_status(sensor, struct.pack('>H', value))
 
     def read(self, size=None):
         if self._int_port._bytes_out:
@@ -233,19 +244,19 @@ class DummyPort(object):
     def decode_frame(self, frame):
         cmd, data = frame[0], frame[1:]
         if cmd == PROTOCOL_CMD_THROTTLE_FWD:
-            self.write_status('forward', struct.pack('>H', 1))
+            self.write_status_int('forward', 1)
             self.write_status('power', data)
         elif cmd == PROTOCOL_CMD_THROTTLE_REV:
-            self.write_status('forward', struct.pack('>H', 0))
+            self.write_status_int('forward', 0)
             self.write_status('power', data)
         elif cmd == PROTOCOL_CMD_TURNOUT_LEFT:
-            self.write_status('turnout', struct.pack('>H', 1))
+            self.write_status_int('turnout', 1)
         elif cmd == PROTOCOL_CMD_TURNOUT_RIGHT:
-            self.write_status('turnout', struct.pack('>H', 0))
+            self.write_status_int('turnout', 0)
         elif cmd == PROTOCOL_CMD_DECOUPLER_UP:
-            self.write_status('decoupler', struct.pack('>H', 1))
+            self.write_status_int('decoupler', 1)
         elif cmd == PROTOCOL_CMD_DECOUPLER_DOWN:
-            self.write_status('decoupler', struct.pack('>H', 0))
+            self.write_status_int('decoupler', 0)
 
     def read_frames(self):
          while not self.stop.is_set():

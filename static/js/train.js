@@ -83,21 +83,29 @@
         initialize: function(options){
             this.direction = options.direction;
             this.listenTo(this.model, "change:decoupler", this.update);
+            this.listenTo(this.model, "change:auto_state", this.update);
             this.el.mousedown(_.bind(this.onMousedown, this));
             this.el.mouseup(_.bind(this.onMouseup, this));
         },
         onMousedown: function() {
-            decoupler('up');
+            decoupler('auto');
         },
         onMouseup: function() {
-            decoupler('down');
+            //decoupler('down');
         },
         update: function() {
-            var state = this.model.get('decoupler');
-            if ( state == 'up' ) {
+            var decoupler = this.model.get('decoupler');
+            var auto_state = this.model.get('auto_state');
+            console.log(decoupler);
+            console.log(auto_state);
+
+            if ( decoupler == 'up' ) {
                 this.el.animate({"fill": "#668", y: 190}, 250, ">");
             }
-            else if ( state == 'down' ) {
+            else if ( auto_state == 'decoupling' ) {
+                this.el.animate({"fill": "#557", y: 200}, 250, ">");
+            }
+            else if ( decoupler == 'down' ) {
                 this.el.animate({"fill": "#33f", y: 200}, 250, ">");
             }
         }

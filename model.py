@@ -129,5 +129,7 @@ class TrainSet(Model):
             self.update_autopilot()
             def _reset_autopilot():
                 self.auto_state = self.AUTO_STATE_IDLE
+                self.decoupler_down()
+                self.throttle_forward(0)
             self.ioloop.add_timeout(self.ioloop.time()+3, _reset_autopilot)
 
