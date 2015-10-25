@@ -112,10 +112,10 @@ class TrainSet(Model):
 
     def update_autopilot(self):
         if self.auto_state == self.AUTO_STATE_DECOUPLING:
-            self.throttle_forward(900)
             if self.sensor_postdecoupler:
                 if self.decoupler == 'down':
                     self.decoupler_up()
+                    self.throttle_forward(750)
                     self.auto_state = self.AUTO_STATE_IDLE
 
     def can_auto_decouple(self):
@@ -126,10 +126,11 @@ class TrainSet(Model):
     def auto_decouple(self):
         if self.can_auto_decouple():
             self.auto_state = self.AUTO_STATE_DECOUPLING
+            self.throttle_forward(525)
             self.update_autopilot()
             def _reset_autopilot():
                 self.auto_state = self.AUTO_STATE_IDLE
                 self.decoupler_down()
                 self.throttle_forward(0)
-            self.ioloop.add_timeout(self.ioloop.time()+3, _reset_autopilot)
+            self.ioloop.add_timeout(self.ioloop.time()+1.5, _reset_autopilot)
 
